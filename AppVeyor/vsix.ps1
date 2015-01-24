@@ -14,7 +14,7 @@ function Vsix-Build{
 
     $buildFile = Get-ChildItem $file
 
-    msbuild $buildFile.FullName /p:configuration=$configuration /p:DeployExtension=false /p:ZipPackageCompressionLevel=normal
+    msbuild $buildFile.FullName /p:configuration=$configuration /p:DeployExtension=false /p:ZipPackageCompressionLevel=normal /v:m
 }
 
 function Vsix-IncrementVersion{
