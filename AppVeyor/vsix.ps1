@@ -58,7 +58,7 @@ function Vsix-IncrementVersion {
 
         [ValidateSet("build","revision")]
         [Parameter(Position=2, Mandatory=0)]
-        [string]$versionSpot = "build",
+        [string]$versionType = "build",
 
         [switch]$updateBuildVersion
     )
@@ -75,10 +75,10 @@ function Vsix-IncrementVersion {
 
     [Version]$version = $attrVersion.Value;
 
-    if ($versionSpot -eq "build"){
+    if ($versionType -eq "build"){
         $version = New-Object Version ([int]$version.Major),([int]$version.Minor),$buildNumber
     }
-    elseif ($versionSpot -eq "revision"){
+    elseif ($versionType -eq "revision"){
         $version = New-Object Version ([int]$version.Major),([int]$version.Minor),([System.Math]::Max([int]$version.Build, 0)),$buildNumber
     }
         
