@@ -56,10 +56,10 @@ function Vsix-IncrementVersion{
 
     $vsixXml.Save($vsixManifest)
 
-    Write-Host "" $newVersion.ToString() `n -ForegroundColor Green
+    Write-Host "" $newVersion.ToString() -ForegroundColor Green
 
     # Updating the AppVeyor build version
     Write-Host "Updating AppVeyor build..." -ForegroundColor Cyan -NoNewline
     Update-AppveyorBuild -Version = $newVersion.ToString()
-    Write-Host "OK" -ForegroundColor Green
+    Write-Host "OK" `n -ForegroundColor Green
 }
