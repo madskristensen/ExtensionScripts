@@ -1,5 +1,22 @@
 # VSIX Module for AppVeyor by Mads Kristensen
 
+
+function Vsix-Build{
+
+    [CmdletBinding()]
+    param (
+        [Parameter(Position=0, Mandatory=0)]
+        [string]$file = "*.sln",
+
+        [Parameter(Position=1, Mandatory=0)]
+        [string]$configuration = "Release"
+    ) 
+
+    $buildFile = Get-ChildItem $file
+
+    msbuild $buildFile.FullName /p:configuration=$configuration /p:DeployExtension=false /p:ZipPackageCompressionLevel=normal
+}
+
 function Vsix-IncrementVersion{
 
     [CmdletBinding()]
@@ -26,5 +43,5 @@ function Vsix-IncrementVersion{
 
     $vsixXml.Save($vsixManifest)
 
-    Write-Host $newVersion.ToString() `n -ForegroundColor Green
+    Write-Host "" $newVersion.ToString() `n -ForegroundColor Green
 }
