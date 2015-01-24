@@ -3,7 +3,7 @@ version: 1.0.{build}
 configuration: CI
 platform: Any CPU
 
-init: 
+install: 
   - ps: Invoke-WebRequest https://raw.githubusercontent.com/madskristensen/ExtensionScripts/master/AppVeyor/vsix.ps1 -OutFile '.\vsix.ps1'
   - ps: Import-Module './vsix.ps1'
 
