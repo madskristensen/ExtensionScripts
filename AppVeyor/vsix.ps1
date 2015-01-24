@@ -11,15 +11,9 @@ function Vsix-IncrementVersion{
         [int]$buildNumber = $env:APPVEYOR_BUILD_NUMBER
     )
 
-    [FileInfo]$vsixManifest = Get-ChildItem $manifestFilePath
+    Write-Host "`nIncrementing VSIX version... "  -ForegroundColor Cyan -NoNewline
 
-    if (!$vsixManifest){
-        Write-Warning "Couldn't find the .vsixmanifest ($manifestFilePath) file `n`n" 
-        return
-    }
-
-    Write-Host "`nIncrementing VSIX version ..."  -ForegroundColor Cyan
-
+    $vsixManifest = Get-ChildItem $manifestFilePath
     [xml]$vsixXml = Get-Content $vsixManifest
 
     $ns = New-Object System.Xml.XmlNamespaceManager $vsixXml.NameTable
@@ -32,5 +26,5 @@ function Vsix-IncrementVersion{
 
     $vsixXml.Save($vsixManifest)
 
-    Write-Host "VSIX version incremented to" $newVersion.ToString() `n -ForegroundColor Green
+    Write-Host $newVersion.ToString() `n -ForegroundColor Green
 }
