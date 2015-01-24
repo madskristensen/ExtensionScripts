@@ -1,25 +1,24 @@
-[CmdletBinding()]
-Param(
-    [switch]$incrementVersion
-)
+# VSIX Module for AppVeyor by Mads Kristensen
 
-Write-Host "`nVSIX build script loaded" `n
+function Vsix-IncrementVersion{
 
+    [CmdletBinding()]
+    param (
+        [Parameter(Position=0, Mandatory=0)]
+        [string]$manifestFilePath = "**\source.extension.vsixmanifest",
 
-# Variables
-[FileInfo]$vsixManifest = Get-ChildItem "**\source.extension.vsixmanifest"
-[int]$buildNumber       = $env:APPVEYOR_BUILD_NUMBER
+        [Parameter(Position=1, Mandatory=0)]
+        [int]$buildNumber = $env:APPVEYOR_BUILD_NUMBER
+    )
 
-
-# Increment VSIX version
-if ($incrementVersion){
+    [FileInfo]$vsixManifest = Get-ChildItem $manifestFilePath
 
     if (!$vsixManifest){
-        Write-Warning "Couldn't find the .vsixmanifest file to increment the version `n`n" 
+        Write-Warning "Couldn't find the .vsixmanifest ($manifestFilePath) file `n`n" 
         return
     }
 
-    Write-Host "  Incrementing VSIX version ..."  -ForegroundColor Cyan
+    Write-Host "`nIncrementing VSIX version ..."  -ForegroundColor Cyan
 
     [xml]$vsixXml = Get-Content $vsixManifest
 
@@ -33,5 +32,5 @@ if ($incrementVersion){
 
     $vsixXml.Save($vsixManifest)
 
-    Write-Host "  VSIX version incremented to" $newVersion.ToString() `n -ForegroundColor Green
+    Write-Host "VSIX version incremented to" $newVersion.ToString() `n -ForegroundColor Green
 }
