@@ -33,7 +33,7 @@ if ($incrementVersion){
     [Version]$newVersion = $version.Value + "." + $buildNumber
     $version.Value = $newVersion
 
-    #$vsixXml.Save($vsixManifest)
+    $vsixXml.Save($vsixManifest)
 
     Write-Host "VSIX version incremented to" $newVersion.ToString()
 }
