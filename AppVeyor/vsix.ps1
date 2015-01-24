@@ -13,8 +13,14 @@ function Vsix-Build{
     ) 
 
     $buildFile = Get-ChildItem $file
+    $env:CONFIGURATION = $configuration
 
     msbuild $buildFile.FullName /p:configuration=$configuration /p:DeployExtension=false /p:ZipPackageCompressionLevel=normal /v:m
+
+    # Updating the AppVeyor build version
+    Write-Host "Updating AppVeyor build..." -ForegroundColor Cyan -NoNewline
+    Update-AppveyorBuild -Version $env:APPVEYOR_BUILD_VERSION
+    Write-Host "OK" `n -ForegroundColor Green
 }
 
 function Vsix-IncrementVersion{
@@ -32,7 +38,7 @@ function Vsix-IncrementVersion{
         [string]$versionSpot = "build"
     )
 
-    Write-Host "`nIncrementing VSIX version... "  -ForegroundColor Cyan -NoNewline
+    Write-Host "`nIncrementing VSIX version..."  -ForegroundColor Cyan -NoNewline
 
     $vsixManifest = Get-ChildItem $manifestFilePath
     [xml]$vsixXml = Get-Content $vsixManifest
@@ -56,10 +62,8 @@ function Vsix-IncrementVersion{
 
     $vsixXml.Save($vsixManifest)
 
-    Write-Host "" $newVersion.ToString() -ForegroundColor Green
+    $env:APPVEYOR_BUILD_VERSION = $newVersion.ToString()
 
-    # Updating the AppVeyor build version
-    Write-Host "Updating AppVeyor build..." -ForegroundColor Cyan -NoNewline
-    Update-AppveyorBuild -Version = $newVersion.ToString()
-    Write-Host "OK" `n -ForegroundColor Green
+    Write-Host $newVersion.ToString() -ForegroundColor Green
+
 }
