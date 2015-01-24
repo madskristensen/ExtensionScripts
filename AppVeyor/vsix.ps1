@@ -1,7 +1,6 @@
 # VSIX Module for AppVeyor by Mads Kristensen
 
-
-function Vsix-Build{
+function Vsix-Build {
 
     [CmdletBinding()]
     param (
@@ -9,7 +8,11 @@ function Vsix-Build{
         [string]$file = "*.sln",
 
         [Parameter(Position=1, Mandatory=0)]
-        [string]$configuration = "Release"
+        [string]$configuration = "Release",
+
+        
+        [switch]$updateBuildVersion,
+        [switch]$pushArtifacts
     ) 
 
     $buildFile = Get-ChildItem $file
@@ -17,13 +20,33 @@ function Vsix-Build{
 
     msbuild $buildFile.FullName /p:configuration=$configuration /p:DeployExtension=false /p:ZipPackageCompressionLevel=normal /v:m
 
-    # Updating the AppVeyor build version
-    Write-Host "Updating AppVeyor build..." -ForegroundColor Cyan -NoNewline
-    Update-AppveyorBuild -Version $env:APPVEYOR_BUILD_VERSION
-    Write-Host "OK" `n -ForegroundColor Green
+    if ($updateBuildVersion){
+        Vsix-UpdateBuildVersion
+    }
+
+    if ($pushArtifacts){
+        Vsix-PushArtifacts
+    }
 }
 
-function Vsix-IncrementVersion{
+function Vsix-PushArtifacts {
+
+    [CmdletBinding()]
+    param (
+        [Parameter(Position=0, Mandatory=0)]
+        [string]$path = "./**/bin/$configuration/*.vsix"
+    ) 
+
+    Get-ChildItem $path | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
+}
+
+function Vsix-UpdateBuildVersion {
+     Write-Host "Updating AppVeyor build..." -ForegroundColor Cyan -NoNewline
+     Update-AppveyorBuild -Version $env:APPVEYOR_BUILD_VERSION
+     Write-Host "OK" `n -ForegroundColor Green
+}
+
+function Vsix-IncrementVersion {
 
     [CmdletBinding()]
     param (
@@ -35,7 +58,9 @@ function Vsix-IncrementVersion{
 
         [ValidateSet("build","revision")]
         [Parameter(Position=2, Mandatory=0)]
-        [string]$versionSpot = "build"
+        [string]$versionSpot = "build",
+
+        [switch]$updateBuildVersion
     )
 
     Write-Host "`nIncrementing VSIX version..."  -ForegroundColor Cyan -NoNewline
@@ -66,4 +91,7 @@ function Vsix-IncrementVersion{
 
     Write-Host $newVersion.ToString() -ForegroundColor Green
 
+    if ($updateBuildVersion){
+        Vsix-UpdateBuildVersion
+    }
 }
