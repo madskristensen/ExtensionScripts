@@ -3,11 +3,11 @@ Param(
     [switch]$incrementVersion
 )
 
-Write-Host `n "VSIX build script loaded" `n
+Write-Host "`nVSIX build script loaded" `n
 
 
 # Variables
-[FileInfo]$vsixManifest = Get-ChildItem "**\source.extension.vsixmanifesst"
+[FileInfo]$vsixManifest = Get-ChildItem "**\source.extension.vsixmanifest"
 [int]$buildNumber       = $env:APPVEYOR_BUILD_NUMBER
 
 
@@ -19,7 +19,7 @@ if ($incrementVersion){
         return
     }
 
-    Write-Host "Incrementing VSIX version in" $vsixManifest.Name
+    Write-Host "  Incrementing VSIX version ..."  -ForegroundColor Cyan
 
     [xml]$vsixXml = Get-Content $vsixManifest
 
@@ -33,5 +33,5 @@ if ($incrementVersion){
 
     $vsixXml.Save($vsixManifest)
 
-    Write-Host "VSIX version incremented to" $newVersion.ToString() `n
+    Write-Host "  VSIX version incremented to" $newVersion.ToString() `n -ForegroundColor Green
 }
