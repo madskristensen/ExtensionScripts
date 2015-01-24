@@ -1,0 +1,15 @@
+version: 1.0.{build}
+
+configuration: CI
+platform: Any CPU
+
+before_build: 
+  ps: |
+    ./build.ps1
+
+build:
+  verbosity: minimal
+
+artifacts:
+- path: '**/*.vsix'
+  name: Nightly Build
