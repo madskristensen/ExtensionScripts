@@ -3,13 +3,11 @@ Param(
     [switch]$incrementVersion
 )
 
-Write-Host
-Write-Host "VSIX build script loaded"
-Write-Host
+Write-Host `n "VSIX build script loaded" `n
 
 
 # Variables
-[FileInfo]$vsixManifest = Get-ChildItem "**\source.extension.vsixmanifest"
+[FileInfo]$vsixManifest = Get-ChildItem "**\source.extension.vsixmanifesst"
 [int]$buildNumber       = $env:APPVEYOR_BUILD_NUMBER
 
 
@@ -17,7 +15,7 @@ Write-Host
 if ($incrementVersion){
 
     if (!$vsixManifest){
-        Write-Warning "Couldn't find the .vsixmanifest file to increment the version" 
+        Write-Warning "Couldn't find the .vsixmanifest file to increment the version `n`n" 
         return
     }
 
@@ -35,5 +33,5 @@ if ($incrementVersion){
 
     $vsixXml.Save($vsixManifest)
 
-    Write-Host "VSIX version incremented to" $newVersion.ToString()
+    Write-Host "VSIX version incremented to" $newVersion.ToString() `n
 }
