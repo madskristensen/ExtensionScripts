@@ -25,7 +25,11 @@ function Vsix-IncrementVersion{
         [string]$manifestFilePath = "**\source.extension.vsixmanifest",
 
         [Parameter(Position=1, Mandatory=0)]
-        [int]$buildNumber = $env:APPVEYOR_BUILD_NUMBER
+        [int]$buildNumber = $env:APPVEYOR_BUILD_NUMBER,
+
+        [ValidateSet("build","revision")]
+        [Parameter(Position=2, Mandatory=0)]
+        [string]$versionSpot = "build"
     )
 
     Write-Host "`nIncrementing VSIX version... "  -ForegroundColor Cyan -NoNewline
@@ -36,10 +40,19 @@ function Vsix-IncrementVersion{
     $ns = New-Object System.Xml.XmlNamespaceManager $vsixXml.NameTable
     $ns.AddNamespace("ns", $vsixXml.DocumentElement.NamespaceURI)
 
-    $version = $vsixXml.SelectSingleNode("//ns:Identity", $ns).Attributes["Version"]
-    
-    [Version]$newVersion = $version.Value + "." + $buildNumber
-    $version.Value = $newVersion
+    $attrVersion = $vsixXml.SelectSingleNode("//ns:Identity", $ns).Attributes["Version"]
+
+    [Version]$version = $attrVersion.Value;
+
+    if ($versionSpot -eq "build"){
+        $version = New-Object Version ([int]$version.Major),([int]$version.Minor),$buildNumber
+    }
+    elseif ($versionSpot -eq "revision"){
+        $version = New-Object Version ([int]$version.Major),([int]$version.Minor),([System.Math]::Max([int]$version.Build, 0)),$buildNumber
+    }
+        
+    [Version]$newVersion = $Version
+    $attrVersion.Value = $newVersion
 
     $vsixXml.Save($vsixManifest)
 
