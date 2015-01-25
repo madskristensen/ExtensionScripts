@@ -4,56 +4,61 @@ function Vsix-Build {
 
     [CmdletBinding()]
     param (
-        [Parameter(Position=0, Mandatory=0, ValueFromPipelineByPropertyName=1)]
-        [string]$project = "*.sln",
+        [Parameter(Position=0, Mandatory=0)]
+        [string]$file = "*.sln",
 
-        [Parameter(Position=1, Mandatory=0, ValueFromPipelineByPropertyName=1)]
-        [string]$configuration = "Release"
+        [Parameter(Position=1, Mandatory=0)]
+        [string]$configuration = "Release",
+
+        
+        [switch]$updateBuildVersion,
+        [switch]$pushArtifacts
     ) 
 
-     $buildFile = Get-ChildItem $project
-     $env:CONFIGURATION = $configuration
+    $buildFile = Get-ChildItem $file
+    $env:CONFIGURATION = $configuration
 
-     Write-Host "Building" $buildFile.Name"..." -ForegroundColor Cyan -NoNewline
-     msbuild $buildfile.FullName /p:configuration=$configuration /p:DeployExtension=false /p:ZipPackageCompressionLevel=normal /v:m
-     Write-Host "OK" -ForegroundColor Green
+    msbuild $buildFile.FullName /p:configuration=$configuration /p:DeployExtension=false /p:ZipPackageCompressionLevel=normal /v:m
+
+    if ($updateBuildVersion){
+        Vsix-UpdateBuildVersion
+    }
+
+    if ($pushArtifacts){
+        Vsix-PushArtifacts
+    }
 }
-
 
 function Vsix-PushArtifacts {
 
     [CmdletBinding()]
     param (
-        [Parameter(Position=0, Mandatory=0, ValueFromPipeline=1, ValueFromPipelineByPropertyName=1)]
-        [string]$configuration = $env:CONFIGURATION,
-
         [Parameter(Position=1, Mandatory=0)]
-        [string]$path = "./**/bin/$configuration/*.vsix"
-    )
+        [string]$configuration = "Release",
+        
+        [Parameter(Position=0, Mandatory=0)]
+        [string]$path = "**/bin/**/*.vsix"
+    ) 
 
-     
-   $fileName = (Get-ChildItem $path)
-     
-   Write-Host "Pushing artifact" $fileName.Name"..." -ForegroundColor Cyan -NoNewline
-   Push-AppveyorArtifact $fileName.FullName -FileName $fileName.Name
-   Write-Host "OK" -ForegroundColor Green
+    
+    $fileName = Get-ChildItem $path
+
+    Write-Host "Pushing artifact" $fileName.Name"..." -ForegroundColor Cyan -NoNewline
+    Push-AppveyorArtifact $fileName.FullName -FileName $fileName.Name
+    Write-Host "OK" -ForegroundColor Green
 }
 
 function Vsix-UpdateBuildVersion {
 
     [CmdletBinding()]
     param (
-        [Parameter(Position=0, Mandatory=0, ValueFromPipelineByPropertyName=1)]
+        [Parameter(Position=0, Mandatory=0)]
         [Version]$version = $env:APPVEYOR_BUILD_VERSION
-    )
+    ) 
 
-    process{
-    
-    Write-Host "Updating AppVeyor build version..." -ForegroundColor Cyan -NoNewline
-    Update-AppveyorBuild -Version $version.ToString()
-    Write-Host $version.ToString() -ForegroundColor Green
-    }
-    
+    Write-Host "Updating AppVeyor build..." -ForegroundColor Cyan -NoNewline
+    Update-AppveyorBuild -Version $version
+    Write-Host "OK" `n -ForegroundColor Green
 }
 
 function Vsix-IncrementVersion {
@@ -68,7 +73,9 @@ function Vsix-IncrementVersion {
 
         [ValidateSet("build","revision")]
         [Parameter(Position=2, Mandatory=0)]
-        [string]$versionType = "build"
+        [string]$versionType = "build",
+
+        [switch]$updateBuildVersion
     )
 
     Write-Host "`nIncrementing VSIX version..."  -ForegroundColor Cyan -NoNewline
@@ -89,12 +96,17 @@ function Vsix-IncrementVersion {
     elseif ($versionType -eq "revision"){
         $version = New-Object Version ([int]$version.Major),([int]$version.Minor),([System.Math]::Max([int]$version.Build, 0)),$buildNumber
     }
-    
-    $attrVersion.Value = $version
+        
+    [Version]$newVersion = $Version
+    $attrVersion.Value = $newVersion
 
     $vsixXml.Save($vsixManifest)
 
-    $env:APPVEYOR_BUILD_VERSION = $version.ToString()
+    $env:APPVEYOR_BUILD_VERSION = $newVersion.ToString()
 
-    Write-Host $version.ToString() -ForegroundColor Green
+    Write-Host $newVersion.ToString() -ForegroundColor Green
+
+    if ($updateBuildVersion){
+        Vsix-UpdateBuildVersion
+    }
 }
