@@ -27,16 +27,16 @@ function Vsix-PushArtifacts {
         [Parameter(Position=0, Mandatory=0, ValueFromPipeline=1, ValueFromPipelineByPropertyName=1)]
         [string]$configuration = $env:CONFIGURATION,
 
-        [Parameter(Position=1, Mandatory=0, ValueFromPipeline=1, ValueFromPipelineByPropertyName=1)]
-        [string]$p = $env:CONFIGURATION
+        [Parameter(Position=1, Mandatory=0)]
+        [string]$path = "./**/bin/$configuration/*.vsix"
     )
 
      
-   $fileName = (Get-ChildItem "./**/bin/$configuration/*.vsix")
+   $fileName = (Get-ChildItem $path)
      
-        Write-Host "Pushing artifact" $fileName.Name"..." -ForegroundColor Cyan -NoNewline
-        Push-AppveyorArtifact $fileName.FullName -FileName $fileName.Name
-        Write-Host "OK" -ForegroundColor Green
+   Write-Host "Pushing artifact" $fileName.Name"..." -ForegroundColor Cyan -NoNewline
+   Push-AppveyorArtifact $fileName.FullName -FileName $fileName.Name
+   Write-Host "OK" -ForegroundColor Green
 }
 
 function Vsix-UpdateBuildVersion {
