@@ -7,7 +7,7 @@ function Vsix-Build {
         [Parameter(Position=0, Mandatory=0, ValueFromPipelineByPropertyName=1)]
         [string]$project = "*.sln",
 
-        [Parameter(Position=1, Mandatory=0)]
+        [Parameter(Position=1, Mandatory=0, ValueFromPipelineByPropertyName=1)]
         [string]$configuration = "Release"
     ) 
 
@@ -19,22 +19,24 @@ function Vsix-Build {
      Write-Host "OK" -ForegroundColor Green
 }
 
+
 function Vsix-PushArtifacts {
 
     [CmdletBinding()]
     param (
-        [Parameter(Position=0, Mandatory=0, ValueFromPipelineByPropertyName=1)]
-        [string]$configuration = "Release",
+        [Parameter(Position=0, Mandatory=0, ValueFromPipeline=1, ValueFromPipelineByPropertyName=1)]
+        [string]$configuration = $env:CONFIGURATION,
 
-        [Parameter(Position=1, Mandatory=0)]
-        [string]$path = "./**/bin/$configuration/*.vsix"
+        [Parameter(Position=1, Mandatory=0, ValueFromPipeline=1, ValueFromPipelineByPropertyName=1)]
+        [string]$p = $env:CONFIGURATION
     )
 
-    $fileName = Get-ChildItem $path
      
-    Write-Host "Pushing artifact" $fileName.Name"..." -ForegroundColor Cyan -NoNewline
-    Push-AppveyorArtifact $fileName.FullName -FileName $fileName.Name
-    Write-Host "OK" -ForegroundColor Green
+   $fileName = (Get-ChildItem "./**/bin/$configuration/*.vsix")
+     
+        Write-Host "Pushing artifact" $fileName.Name"..." -ForegroundColor Cyan -NoNewline
+        Push-AppveyorArtifact $fileName.FullName -FileName $fileName.Name
+        Write-Host "OK" -ForegroundColor Green
 }
 
 function Vsix-UpdateBuildVersion {
@@ -44,10 +46,13 @@ function Vsix-UpdateBuildVersion {
         [Parameter(Position=0, Mandatory=0, ValueFromPipelineByPropertyName=1)]
         [Version]$version = $env:APPVEYOR_BUILD_VERSION
     )
+
+    process{
     
     Write-Host "Updating AppVeyor build version..." -ForegroundColor Cyan -NoNewline
     Update-AppveyorBuild -Version $version.ToString()
     Write-Host $version.ToString() -ForegroundColor Green
+    }
     
 }
 
