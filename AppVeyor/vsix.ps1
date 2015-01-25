@@ -35,7 +35,9 @@ function Vsix-PushArtifacts {
     [CmdletBinding()]
     param (
         [Parameter(Position=0, Mandatory=0)]
-        [string]$path = "**/bin/**/*.vsix"
+        [string]$path = "**/bin/**/*.vsix",
+
+        [switch]$publishToGallery
     ) 
 
     $fileName = Get-ChildItem $path
@@ -43,9 +45,13 @@ function Vsix-PushArtifacts {
     Write-Host "Pushing artifact" $fileName.Name"..." -ForegroundColor Cyan -NoNewline
     Push-AppveyorArtifact $fileName.FullName -FileName $fileName.Name
     Write-Host "OK" -ForegroundColor Green
+
+    if ($publishToGallery){
+        vsix-PublishToGallery $fileName.FullName
+    }
 }
 
-function vsix-publishToGallery{
+function vsix-PublishToGallery{
 
     [CmdletBinding()]
     param (
