@@ -44,7 +44,7 @@ function Vsix-PushArtifacts {
     $fileName = Get-ChildItem $path
 
     Write-Host "Pushing artifact" $fileName.Name"..." -ForegroundColor Cyan -NoNewline
-    #Push-AppveyorArtifact $fileName.FullName -FileName $fileName.Name
+    Push-AppveyorArtifact $fileName.FullName -FileName $fileName.Name
     Write-Host "OK" -ForegroundColor Green
 }
 
