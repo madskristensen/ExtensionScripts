@@ -19,7 +19,7 @@ function Vsix-Build {
     $env:CONFIGURATION = $configuration
 
     Write-Host "Building" $buildFile.Name -ForegroundColor cyan
-    msbuild $buildFile.FullName /p:configuration=$configuration /p:DeployExtension=false /p:ZipPackageCompressionLevel=normal /v:m
+    msbuild $buildFile.FullName /p:configuration=Release /p:DeployExtension=false /p:ZipPackageCompressionLevel=normal /v:m
 
     if ($updateBuildVersion){
         Vsix-UpdateBuildVersion
@@ -34,11 +34,8 @@ function Vsix-PushArtifacts {
 
     [CmdletBinding()]
     param (
-        [Parameter(Position=1, Mandatory=0)]
-        [string]$configuration = $env:CONFIGURATION,
-        
         [Parameter(Position=0, Mandatory=0)]
-        [string]$path = "**/bin/$configuration/*.vsix"
+        [string]$path = "**/bin/**/*.vsix"
     ) 
 
     $fileName = Get-ChildItem $path
