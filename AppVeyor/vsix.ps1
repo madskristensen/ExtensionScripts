@@ -60,7 +60,7 @@ function vsix-PublishToGallery{
     ) 
 
     $fileName = (Get-ChildItem $path)[0]
-    $artifact = ("https://ci.appveyor.com/api/buildjobs/" + $env:APPVEYOR_BUILD_ID + "/artifacts/" + $fileName.Name)
+    $artifact = ("https://ci.appveyor.com/api/buildjobs/" + $env:APPVEYOR_JOB_ID + "/artifacts/" + $fileName.Name)
 
     [Reflection.Assembly]::LoadWithPartialName("System.Web") | Out-Null
     $encode = [System.Web.HttpUtility]::UrlEncode($artifact) 
