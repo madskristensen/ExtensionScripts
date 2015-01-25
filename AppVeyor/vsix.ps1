@@ -61,7 +61,7 @@ function Vsix-UpdateBuildVersion {
     Write-Host $version -ForegroundColor Green
 }
 
-function Vsix-IncrementVersion {
+function Vsix-IncrementVsixVersion {
 
     [CmdletBinding()]
     param (
