@@ -45,6 +45,25 @@ function Vsix-PushArtifacts {
     Write-Host "OK" -ForegroundColor Green
 }
 
+function vsix-publishToGallery{
+
+    [CmdletBinding()]
+    param (
+        [Parameter(Position=0, Mandatory=0)]
+        [string]$path = "**/bin/**/*.vsix"
+    ) 
+
+    $fileName = (Get-ChildItem $path)[0]
+    $url = ("https://ci.appveyor.com/api/buildjobs/" + $env:APPVEYOR_BUILD_ID + "/artifacts/" + $fileName.Name)
+
+    [Reflection.Assembly]::LoadWithPartialName("System.Web") | Out-Null
+    $encode = [System.Web.HttpUtility]::UrlEncode($url) 
+
+    Write-Host "Publish to VSIX Gallery..." -ForegroundColor Cyan -NoNewline
+    Invoke-WebRequest "http://vsixgallery.azurewebsites.net/home/ping?url=$encode" -Method Post
+    Write-Host "OK" -ForegroundColor Green
+}
+
 function Vsix-UpdateBuildVersion {
 
     [CmdletBinding()]
