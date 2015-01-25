@@ -64,7 +64,7 @@ function vsix-PublishToGallery{
 
     [Reflection.Assembly]::LoadWithPartialName("System.Web") | Out-Null
     $encode = [System.Web.HttpUtility]::UrlEncode($url) 
-
+    Write-Host $encode
     Write-Host "Publish to VSIX Gallery..." -ForegroundColor Cyan -NoNewline
     Invoke-WebRequest "http://vsixgallery.azurewebsites.net/home/ping?url=$encode" -Method Post
     Write-Host "OK" -ForegroundColor Green
