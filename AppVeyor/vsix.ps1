@@ -15,7 +15,7 @@ function Vsix-Build {
      $env:CONFIGURATION = $configuration
 
      Write-Host "Building" $buildFile.Name"..." -ForegroundColor Cyan -NoNewline
-     msbuild $project.FullName /p:configuration=$configuration /p:DeployExtension=false /p:ZipPackageCompressionLevel=normal /v:m
+     msbuild $buildfile.FullName /p:configuration=$configuration /p:DeployExtension=false /p:ZipPackageCompressionLevel=normal /v:m
      Write-Host "OK" -ForegroundColor Green
 }
 
