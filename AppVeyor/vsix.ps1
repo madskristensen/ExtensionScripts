@@ -7,7 +7,7 @@ function Vsix-Build {
         [Parameter(Position=0, Mandatory=0, ValueFromPipelineByPropertyName=1)]
         [string]$project = "*.sln",
 
-        [Parameter(Position=1, Mandatory=0, ValueFromPipelineByPropertyName=1)]
+        [Parameter(Position=1, Mandatory=0)]
         [string]$configuration = "Release"
     ) 
 
@@ -26,7 +26,7 @@ function Vsix-PushArtifacts {
         [Parameter(Position=0, Mandatory=0, ValueFromPipelineByPropertyName=1)]
         [string]$configuration = "Release",
 
-        [Parameter(Position=1, Mandatory=0, ValueFromPipeline=1)]
+        [Parameter(Position=1, Mandatory=0)]
         [string]$path = "./**/bin/$configuration/*.vsix"
     )
 
