@@ -26,7 +26,7 @@ function Vsix-Build {
     }
 
     if ($pushArtifacts){
-        Vsix-PushArtifacts
+        Vsix-PushArtifacts -configuration $configuration
     }
 }
 
@@ -38,7 +38,7 @@ function Vsix-PushArtifacts {
         [string]$configuration = $env:CONFIGURATION,
         
         [Parameter(Position=0, Mandatory=0)]
-        [string]$path = "**/bin/**/*.vsix"
+        [string]$path = "**/bin/$configuration/*.vsix"
     ) 
 
     $fileName = Get-ChildItem $path
@@ -97,16 +97,14 @@ function Vsix-IncrementVersion {
         $version = New-Object Version ([int]$version.Major),([int]$version.Minor),([System.Math]::Max([int]$version.Build, 0)),$buildNumber
     }
         
-    [Version]$newVersion = $Version
-    $attrVersion.Value = $newVersion
-
+    $attrVersion.Value = $version
     $vsixXml.Save($vsixManifest)
 
-    $env:APPVEYOR_BUILD_VERSION = $newVersion.ToString()
+    $env:APPVEYOR_BUILD_VERSION = $version.ToString()
 
-    Write-Host $newVersion.ToString() -ForegroundColor Green
+    Write-Host $version.ToString() -ForegroundColor Green
 
     if ($updateBuildVersion){
-        Vsix-UpdateBuildVersion
+        Vsix-UpdateBuildVersion $version
     }
 }
