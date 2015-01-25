@@ -60,13 +60,14 @@ function vsix-PublishToGallery{
     ) 
 
     $fileName = (Get-ChildItem $path)[0]
-    $url = ("https://ci.appveyor.com/api/buildjobs/" + $env:APPVEYOR_BUILD_ID + "/artifacts/" + $fileName.Name)
+    $artifact = ("https://ci.appveyor.com/api/buildjobs/" + $env:APPVEYOR_BUILD_ID + "/artifacts/" + $fileName.Name)
 
     [Reflection.Assembly]::LoadWithPartialName("System.Web") | Out-Null
-    $encode = [System.Web.HttpUtility]::UrlEncode($url) 
-    Write-Host $encode
+    $encode = [System.Web.HttpUtility]::UrlEncode($artifact) 
+    $url = "http://vsixgallery.azurewebsites.net/home/ping?url=$encode"
+    Write-Host $url
     Write-Host "Publish to VSIX Gallery..." -ForegroundColor Cyan -NoNewline
-    Invoke-WebRequest "http://vsixgallery.azurewebsites.net/home/ping?url=$encode" -Method Post
+    Invoke-WebRequest $url -Method Post
     Write-Host "OK" -ForegroundColor Green
 }
 
