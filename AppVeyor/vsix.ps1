@@ -18,6 +18,7 @@ function Vsix-Build {
     $buildFile = Get-ChildItem $file
     $env:CONFIGURATION = $configuration
 
+    Write-Host "Building" $buildFile.Name -ForegroundColor cyan
     msbuild $buildFile.FullName /p:configuration=$configuration /p:DeployExtension=false /p:ZipPackageCompressionLevel=normal /v:m
 
     if ($updateBuildVersion){
@@ -34,17 +35,16 @@ function Vsix-PushArtifacts {
     [CmdletBinding()]
     param (
         [Parameter(Position=1, Mandatory=0)]
-        [string]$configuration = "Release",
+        [string]$configuration = $env:CONFIGURATION,
         
         [Parameter(Position=0, Mandatory=0)]
         [string]$path = "**/bin/**/*.vsix"
     ) 
 
-    
     $fileName = Get-ChildItem $path
 
     Write-Host "Pushing artifact" $fileName.Name"..." -ForegroundColor Cyan -NoNewline
-    Push-AppveyorArtifact $fileName.FullName -FileName $fileName.Name
+    #Push-AppveyorArtifact $fileName.FullName -FileName $fileName.Name
     Write-Host "OK" -ForegroundColor Green
 }
 
@@ -56,9 +56,9 @@ function Vsix-UpdateBuildVersion {
         [Version]$version = $env:APPVEYOR_BUILD_VERSION
     ) 
 
-    Write-Host "Updating AppVeyor build..." -ForegroundColor Cyan -NoNewline
+    Write-Host "Updating AppVeyor build version..." -ForegroundColor Cyan -NoNewline
     Update-AppveyorBuild -Version $version
-    Write-Host "OK" `n -ForegroundColor Green
+    Write-Host $version -ForegroundColor Green
 }
 
 function Vsix-IncrementVersion {
