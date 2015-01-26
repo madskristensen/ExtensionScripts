@@ -47,7 +47,7 @@ function vsix-PublishToGallery{
 
     $fileName = (Get-ChildItem $path)[0]
 
-    [string]$url = ($vsixUploadEndpoint + "e?repo=" + $repo + "&issuetracker=" + $issueTracker)
+    [string]$url = ($vsixUploadEndpoint + "?repo=" + $repo + "&issuetracker=" + $issueTracker)
     [byte[]]$bytes = Get-Content $fileName -Encoding byte
     
     Invoke-WebRequest $url -Method Post -Body $bytes
