@@ -1,6 +1,7 @@
 # VSIX Module for AppVeyor by Mads Kristensen
 
-$vsixUploadEndpoint = "http://vsixgallery.azurewebsites.net/extension/uploadFile"
+$vsixUploadEndpoint = "http://vsixgallery.com/extension/uploadFile"
+#$vsixUploadEndpoint = "http://localhost:7035/extension/uploadFile"
 
 function Vsix-PushArtifacts {
 
@@ -44,17 +45,20 @@ function vsix-PublishToGallery{
         $issueTracker = [System.Web.HttpUtility]::UrlEncode(($repo + "issues/"))
     }
 
-    Write-Host "Publish to VSIX Gallery..." -ForegroundColor Cyan
+    Write-Host "Publish to VSIX Gallery..." -ForegroundColor Cyan -NoNewline
 
     $fileName = (Get-ChildItem $path)[0]
 
     [string]$url = ($vsixUploadEndpoint + "?repo=" + $repo + "&issuetracker=" + $issueTracker)
     [byte[]]$bytes = Get-Content $fileName -Encoding byte
     
-    Invoke-WebRequest $url -Method Post -Body $bytes
-
-    Write-Host "Publish to VSIX Gallery..." -ForegroundColor Cyan -NoNewline
-    Write-Host "OK" -ForegroundColor Green
+    try {
+        $response = Invoke-WebRequest $url -Method Post -Body $bytes
+        Write-Host "OK" -ForegroundColor Green
+    } catch{
+        Write-Host "FAIL" -ForegroundColor Red
+        write-host $_.Exception.Response.Headers["x-error"]
+    }    
 }
 
 function Vsix-UpdateBuildVersion {
