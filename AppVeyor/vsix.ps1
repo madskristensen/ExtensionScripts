@@ -76,8 +76,8 @@ function Vsix-UpdateBuildVersion {
 
     [CmdletBinding()]
     param (
-        [Parameter(Position=0, Mandatory=0)]
-        [Version]$version = $env:APPVEYOR_BUILD_VERSION
+        [Parameter(Position=0, Mandatory=1)]
+        [Version]$version
     ) 
 
     Write-Host "Updating AppVeyor build version..." -ForegroundColor Cyan -NoNewline
@@ -124,11 +124,9 @@ function Vsix-IncrementVsixVersion {
     $attrVersion.Value = $version
     $vsixXml.Save($vsixManifest)
 
-    $env:APPVEYOR_BUILD_VERSION = $version.ToString()
-
     Write-Host $version.ToString() -ForegroundColor Green
 
-    if ($updateBuildVersion){
+    if ($updateBuildVersion -and $env:APPVEYOR_BUILD_VERSION -ne $version.ToString()){
         Vsix-UpdateBuildVersion $version
     }
 }
