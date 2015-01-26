@@ -29,8 +29,6 @@ function vsix-PublishToGallery{
         [string]$path = "**/bin/**/*.vsix"
     ) 
 
-    Write-Host ("PR" + $env:APPVEYOR_PULL_REQUEST_NUMBER)
-
     if ($env:APPVEYOR_PULL_REQUEST_NUMBER){
         return
     }
