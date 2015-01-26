@@ -1,35 +1,5 @@
 # VSIX Module for AppVeyor by Mads Kristensen
 
-function Vsix-Build {
-
-    [CmdletBinding()]
-    param (
-        [Parameter(Position=0, Mandatory=0)]
-        [string]$file = "*.sln",
-
-        [Parameter(Position=1, Mandatory=0)]
-        [string]$configuration = "Release",
-
-        
-        [switch]$updateBuildVersion,
-        [switch]$pushArtifacts
-    ) 
-
-    $buildFile = Get-ChildItem $file
-    $env:CONFIGURATION = $configuration
-
-    Write-Host "Building" $buildFile.Name -ForegroundColor cyan
-    msbuild $buildFile.FullName /p:configuration=Release /p:DeployExtension=false /p:ZipPackageCompressionLevel=normal /v:m
-
-    if ($updateBuildVersion){
-        Vsix-UpdateBuildVersion
-    }
-
-    if ($pushArtifacts){
-        Vsix-PushArtifacts -configuration $configuration
-    }
-}
-
 function Vsix-PushArtifacts {
 
     [CmdletBinding()]
@@ -58,6 +28,10 @@ function vsix-PublishToGallery{
         [Parameter(Position=0, Mandatory=0)]
         [string]$path = "**/bin/**/*.vsix"
     ) 
+
+    if ($env:APPVEYOR_PULL_REQUEST_NUMBER){
+        return
+    }
 
     Write-Host "Publish to VSIX Gallery..." -ForegroundColor Cyan
 
