@@ -1,6 +1,6 @@
 # VSIX Module for AppVeyor by Mads Kristensen
 
-$vsixUploadEndpoint = "http://vsixgallery.azurewebsites.net/extensions/uploadFile"
+$vsixUploadEndpoint = "http://vsixgallery.azurewebsites.net/extension/uploadFile"
 
 function Vsix-PushArtifacts {
 
@@ -39,6 +39,7 @@ function vsix-PublishToGallery{
     $issueTracker = ""
 
     if ($env:APPVEYOR_REPO_PROVIDER -contains "github"){
+        [Reflection.Assembly]::LoadWithPartialName("System.Web") | Out-Null
         $repo = [System.Web.HttpUtility]::UrlEncode(("https://github.com/" + $env:APPVEYOR_REPO_NAME + "/"))
         $issueTracker = [System.Web.HttpUtility]::UrlEncode(($repo + "issues/"))
     }
