@@ -33,11 +33,21 @@ function vsix-PublishToGallery{
         return
     }
 
+    Write-Host $env:APPVEYOR_REPO_PROVIDER
+
+    $repo = ""
+    $issueTracker = ""
+
+    if ($env:APPVEYOR_REPO_PROVIDER -contains "GitHub"){
+        $repo = ("https://github.com/" + $env:APPVEYOR_REPO_NAME + "/")
+        $issueTracker = ($repo + "issues/")
+    }
+
     Write-Host "Publish to VSIX Gallery..." -ForegroundColor Cyan
 
     $fileName = (Get-ChildItem $path)[0]
 
-    [string]$url = "http://vsixgallery.azurewebsites.net/home/uploadFile"
+    [string]$url = ("http://vsixgallery.azurewebsites.net/home/uploadFile?repo=" + $repo + "&issuetracker=" + $issueTracker)
     [byte[]]$bytes = Get-Content $fileName -Encoding byte
     
     Invoke-WebRequest $url -Method Post -Body $bytes
