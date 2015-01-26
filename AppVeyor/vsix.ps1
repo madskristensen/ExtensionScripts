@@ -59,12 +59,12 @@ function vsix-PublishToGallery{
         [string]$path = "**/bin/**/*.vsix"
     ) 
 
+    Write-Host "Publish to VSIX Gallery..." -ForegroundColor Cyan
+
     $fileName = (Get-ChildItem $path)[0]
 
     [string]$url = "http://vsixgallery.azurewebsites.net/home/uploadFile"
     [byte[]]$bytes = Get-Content $fileName -Encoding byte
-
-    Write-Host "Publish to VSIX Gallery..." -ForegroundColor Cyan
     
     Invoke-WebRequest $url -Method Post -Body $bytes
 
