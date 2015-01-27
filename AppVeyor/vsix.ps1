@@ -13,15 +13,17 @@ function Vsix-PushArtifacts {
         [switch]$publishToGallery
     ) 
 
-    Write-Host ("Configuration: " + $env:CONFIGURATION)
-
     $fileName = (Get-ChildItem $path -Recurse)[0] # Instead of taking the first, support multiple vsix files
 
-    Write-Host ("Pushing artifact " + $fileName.Name + "...") -ForegroundColor Cyan -NoNewline
-    Push-AppveyorArtifact $fileName.FullName -FileName $fileName.Name
-    Write-Host "OK" -ForegroundColor Green
+    if (Get-Command Update-AppveyorBuild -errorAction SilentlyContinue)
+    {
+        Write-Host ("Pushing artifact " + $fileName.Name + "...") -ForegroundColor Cyan -NoNewline
+        Push-AppveyorArtifact $fileName.FullName -FileName $fileName.Name
+        Write-Host "OK" -ForegroundColor Green
+    }
 
-    if ($publishToGallery){
+    if ($publishToGallery -and $fileName)
+    {
         vsix-PublishToGallery $fileName.FullName
     }
 }
@@ -96,7 +98,7 @@ function Vsix-IncrementVsixVersion {
         [switch]$updateBuildVersion
     )
 
-    Write-Host "`nIncrementing VSIX version..."  -ForegroundColor Cyan -NoNewline
+    Write-Host "Incrementing VSIX version..."  -ForegroundColor Cyan -NoNewline
 
     $vsixManifest = (Get-ChildItem $manifestFilePath -Recurse)[0] # Instead of taking the first, support multiple vsixmanifest files
     [xml]$vsixXml = Get-Content $vsixManifest
@@ -120,7 +122,8 @@ function Vsix-IncrementVsixVersion {
 
     Write-Host $version.ToString() -ForegroundColor Green
 
-    if ($updateBuildVersion -and $env:APPVEYOR_BUILD_VERSION -ne $version.ToString()){
+    if ($updateBuildVersion -and $env:APPVEYOR_BUILD_VERSION -ne $version.ToString())
+    {
         Vsix-UpdateBuildVersion $version
     }
 }
