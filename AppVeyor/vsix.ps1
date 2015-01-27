@@ -8,12 +8,12 @@ function Vsix-PushArtifacts {
     [CmdletBinding()]
     param (
         [Parameter(Position=0, Mandatory=0)]
-        [string]$path = "**/bin/*/*.vsix",
+        [string]$path = "./bin/ *.vsix",
 
         [switch]$publishToGallery
     ) 
 
-    $fileName = Get-ChildItem $path
+    $fileName = (Get-ChildItem $path -Recurse)[0]
 
     Write-Host ("Pushing artifact " + $fileName.Name + "...") -ForegroundColor Cyan -NoNewline
     Push-AppveyorArtifact $fileName.FullName -FileName $fileName.Name
