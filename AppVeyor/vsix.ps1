@@ -79,7 +79,7 @@ function Vsix-IncrementVsixVersion {
     [CmdletBinding()]
     param (
         [Parameter(Position=0, Mandatory=0)]
-        [string]$manifestFilePath = "**\source.extension.vsixmanifest",
+        [string]$manifestFilePath = ".\source.extension.vsixmanifest",
 
         [Parameter(Position=1, Mandatory=0)]
         [int]$buildNumber = $env:APPVEYOR_BUILD_NUMBER,
@@ -93,7 +93,7 @@ function Vsix-IncrementVsixVersion {
 
     Write-Host "`nIncrementing VSIX version..."  -ForegroundColor Cyan -NoNewline
 
-    $vsixManifest = Get-ChildItem $manifestFilePath
+    $vsixManifest = Get-ChildItem $manifestFilePath -Recurse
     [xml]$vsixXml = Get-Content $vsixManifest
 
     $ns = New-Object System.Xml.XmlNamespaceManager $vsixXml.NameTable
