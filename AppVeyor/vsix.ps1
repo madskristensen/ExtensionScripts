@@ -29,7 +29,7 @@ function vsix-PublishToGallery{
     [CmdletBinding()]
     param (
         [Parameter(Position=0, Mandatory=0)]
-        [string]$path = "**/bin/*/*.vsix"
+        [string]$path = "./bin/ *.vsix"
     ) 
 
     if ($env:APPVEYOR_PULL_REQUEST_NUMBER){
@@ -47,7 +47,7 @@ function vsix-PublishToGallery{
 
     Write-Host "Publish to VSIX Gallery..." -ForegroundColor Cyan -NoNewline
 
-    $fileName = (Get-ChildItem $path)[0]
+    $fileName = (Get-ChildItem $path -Recurse)[0]
 
     [string]$url = ($vsixUploadEndpoint + "?repo=" + $repo + "&issuetracker=" + $issueTracker)
     [byte[]]$bytes = Get-Content $fileName -Encoding byte
