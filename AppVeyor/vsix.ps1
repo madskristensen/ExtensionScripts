@@ -13,7 +13,7 @@ function Vsix-PushArtifacts {
         [switch]$publishToGallery
     ) 
 
-    $fileName = (Get-ChildItem $path -Recurse)[0]
+    $fileName = (Get-ChildItem $path -Recurse)[0] # Instead of taking the first, support multiple vsix files
 
     Write-Host ("Pushing artifact " + $fileName.Name + "...") -ForegroundColor Cyan -NoNewline
     Push-AppveyorArtifact $fileName.FullName -FileName $fileName.Name
@@ -47,7 +47,7 @@ function vsix-PublishToGallery{
 
     Write-Host "Publish to VSIX Gallery..." -ForegroundColor Cyan -NoNewline
 
-    $fileName = (Get-ChildItem $path -Recurse)[0]
+    $fileName = (Get-ChildItem $path -Recurse)[0] # Instead of taking the first, support multiple vsix files
 
     [string]$url = ($vsixUploadEndpoint + "?repo=" + $repo + "&issuetracker=" + $issueTracker)
     [byte[]]$bytes = Get-Content $fileName -Encoding byte
@@ -93,7 +93,7 @@ function Vsix-IncrementVsixVersion {
 
     Write-Host "`nIncrementing VSIX version..."  -ForegroundColor Cyan -NoNewline
 
-    $vsixManifest = Get-ChildItem $manifestFilePath -Recurse
+    $vsixManifest = (Get-ChildItem $manifestFilePath -Recurse)[0] # Instead of taking the first, support multiple vsixmanifest files
     [xml]$vsixXml = Get-Content $vsixManifest
 
     $ns = New-Object System.Xml.XmlNamespaceManager $vsixXml.NameTable
