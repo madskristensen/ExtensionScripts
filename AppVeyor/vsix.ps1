@@ -54,7 +54,7 @@ function vsix-PublishToGallery{
     $fileName = (Get-ChildItem $path -Recurse)[0] # Instead of taking the first, support multiple vsix files
 
     [string]$url = ($vsixUploadEndpoint + "?repo=" + $repo + "&issuetracker=" + $issueTracker)
-    [byte[]]$bytes = Get-Content $fileName -Encoding byte
+    [byte[]]$bytes = [System.IO.File]::ReadAllBytes($fileName)
     
     try {
         $response = Invoke-WebRequest $url -Method Post -Body $bytes
