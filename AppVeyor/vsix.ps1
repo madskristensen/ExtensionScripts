@@ -8,10 +8,12 @@ function Vsix-PushArtifacts {
     [CmdletBinding()]
     param (
         [Parameter(Position=0, Mandatory=0)]
-        [string]$path = "./bin/*/*.vsix",
+        [string]$path = "./*.vsix",
 
         [switch]$publishToGallery
     ) 
+
+    Write-Host ("Configuration: " + $env:CONFIGURATION)
 
     $fileName = (Get-ChildItem $path -Recurse)[0] # Instead of taking the first, support multiple vsix files
 
@@ -29,7 +31,7 @@ function vsix-PublishToGallery{
     [CmdletBinding()]
     param (
         [Parameter(Position=0, Mandatory=0)]
-        [string]$path = "./bin/*/*.vsix"
+        [string]$path = "./*.vsix"
     ) 
 
     if ($env:APPVEYOR_PULL_REQUEST_NUMBER){
