@@ -8,7 +8,7 @@ function Vsix-PushArtifacts {
     [CmdletBinding()]
     param (
         [Parameter(Position=0, Mandatory=0)]
-        [string]$path = "./bin/ *.vsix",
+        [string]$path = "./bin/*/*.vsix",
 
         [switch]$publishToGallery
     ) 
