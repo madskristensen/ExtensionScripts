@@ -71,9 +71,12 @@ function Vsix-UpdateBuildVersion {
         [Version]$version
     ) 
 
-    Write-Host "Updating AppVeyor build version..." -ForegroundColor Cyan -NoNewline
-    Update-AppveyorBuild -Version $version
-    Write-Host $version -ForegroundColor Green
+    if (Get-Command Update-AppveyorBuild -errorAction SilentlyContinue)
+    {
+        Write-Host "Updating AppVeyor build version..." -ForegroundColor Cyan -NoNewline
+        Update-AppveyorBuild -Version $version
+        Write-Host $version -ForegroundColor Green
+    }
 }
 
 function Vsix-IncrementVsixVersion {
