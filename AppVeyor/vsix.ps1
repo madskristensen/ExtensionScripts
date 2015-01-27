@@ -29,7 +29,7 @@ function vsix-PublishToGallery{
     [CmdletBinding()]
     param (
         [Parameter(Position=0, Mandatory=0)]
-        [string]$path = "./bin/ *.vsix"
+        [string]$path = "./bin/*/*.vsix"
     ) 
 
     if ($env:APPVEYOR_PULL_REQUEST_NUMBER){
