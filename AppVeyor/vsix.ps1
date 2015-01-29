@@ -1,6 +1,6 @@
 # VSIX Module for AppVeyor by Mads Kristensen
 
-$vsixUploadEndpoint = "http://vsixgallery.com/extension/uploadFile"
+$vsixUploadEndpoint = "http://vsixgallery.com/api/uploadFile"
 #$vsixUploadEndpoint = "http://localhost:7035/extension/uploadFile"
 
 function Vsix-PushArtifacts {
