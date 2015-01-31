@@ -73,9 +73,9 @@ function Vsix-PublishToGallery{
 function Vsix-UpdateBuildVersion {
     [cmdletbinding()]
     param (
-        [Parameter(Position=0, Mandatory=1)]
+        [Parameter(Position=0, Mandatory=1,ValueFromPipelineByPropertyName=$true)]
         [Version[]]$version,
-        [Parameter(Position=1,ValueFromPipeline=$true)]
+        [Parameter(Position=1,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true)]
         $vsixFilePath
     ) 
     process{
@@ -139,8 +139,11 @@ function Vsix-IncrementVsixVersion {
                 Vsix-UpdateBuildVersion $version | Out-Null
             }
 
-            # return manifestFile for the pipeline
-            $manifestFile
+            # return the values to the pipeline
+            New-Object PSObject -Property @{
+                'vsixFilePath' = $manifestFile
+                'Version' = $version
+            }
         }
     }
 }
