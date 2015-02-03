@@ -1,8 +1,7 @@
 version: 1.0.{build}
 
 install: 
-  - ps: Start-FileDownload https://raw.githubusercontent.com/madskristensen/ExtensionScripts/master/AppVeyor/vsix.ps1
-  - ps: Import-Module './vsix.ps1'
+  - ps: (new-object Net.WebClient).DownloadString("https://raw.github.com/madskristensen/ExtensionScripts/master/AppVeyor/vsix.ps1") | iex
 
 before_build: 
   - ps: Vsix-IncrementVsixVersion | Vsix-UpdateBuildVersion
@@ -10,5 +9,5 @@ before_build:
 build_script:
   - msbuild /p:configuration=Release /p:DeployExtension=false /p:ZipPackageCompressionLevel=normal /v:m
 
-after_build:
+after_test:
   - ps: Vsix-PushArtifacts | Vsix-PublishToGallery
