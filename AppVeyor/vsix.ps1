@@ -3,7 +3,7 @@
 param()
 
 $vsixUploadEndpoint = "http://vsixgallery.com/api/upload"
-#$vsixUploadEndpoint = "http://localhost:7035/extension/upload"
+#$vsixUploadEndpoint = "http://localhost:7035/api/upload"
 
 function Vsix-PushArtifacts {
     [cmdletbinding()]
@@ -141,7 +141,7 @@ function Vsix-IncrementVsixVersion {
 
             # return the values to the pipeline
             New-Object PSObject -Property @{
-                'vsixFilePath' = $manifestFile
+                'vsixFilePath' = $vsixManifest
                 'Version' = $version
             }
         }
