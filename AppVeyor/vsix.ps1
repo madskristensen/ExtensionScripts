@@ -20,7 +20,7 @@ function Vsix-PushArtifacts {
             if (Get-Command Update-AppveyorBuild -errorAction SilentlyContinue)
             {
                 Write-Host ("Pushing artifact " + $fileName.Name + "...") -ForegroundColor Cyan -NoNewline
-                Push-AppveyorArtifact ($fileName.FullName) -FileName $fileName.Name
+                Push-AppveyorArtifact ($fileName.FullName) -FileName $fileName.Name -DeploymentName "Latest build"
                 Write-Host "OK" -ForegroundColor Green
             }
 
