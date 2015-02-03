@@ -3,7 +3,7 @@
 param()
 
 $vsixUploadEndpoint = "http://vsixgallery.com/api/upload"
-#$vsixUploadEndpoint = "http://localhost:7035/api/upload"
+#$vsixUploadEndpoint = "http://localhost:7035/extension/upload"
 
 function Vsix-PushArtifacts {
     [cmdletbinding()]
@@ -111,8 +111,8 @@ function Vsix-IncrementVsixVersion {
         foreach($manifestFile in $manifestFilePath)
         {
             "Incrementing VSIX version..." | Write-Host  -ForegroundColor Cyan -NoNewline
-
-            $vsixManifest = (Get-ChildItem $manifestFile -Recurse)[0] # Instead of taking the first, support multiple vsixmanifest files
+            $matches = (Get-ChildItem $manifestFile -Recurse)
+            $vsixManifest = $matches[$matches.Length - 1] # Get the last one which matches the top most file in the recursive matches
             [xml]$vsixXml = Get-Content $vsixManifest
 
             $ns = New-Object System.Xml.XmlNamespaceManager $vsixXml.NameTable
