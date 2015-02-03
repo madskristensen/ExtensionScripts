@@ -112,7 +112,7 @@ function Vsix-IncrementVsixVersion {
         {
             "Incrementing VSIX version..." | Write-Host  -ForegroundColor Cyan -NoNewline
             $matches = (Get-ChildItem $manifestFile -Recurse)
-            $vsixManifest = $matches[$matches.Length - 1] # Get the last one which matches the top most file in the recursive matches
+            $vsixManifest = $matches[$matches.Count - 1] # Get the last one which matches the top most file in the recursive matches
             [xml]$vsixXml = Get-Content $vsixManifest
 
             $ns = New-Object System.Xml.XmlNamespaceManager $vsixXml.NameTable
