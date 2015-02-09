@@ -60,7 +60,7 @@ function Vsix-PublishToGallery{
         [byte[]]$bytes = [System.IO.File]::ReadAllBytes($fileName)
     
         try {
-            $response = Invoke-WebRequest $url -Method Post -Body $bytes
+            #$response = Invoke-WebRequest $url -Method Post -Body $bytes
             'OK' | Write-Host -ForegroundColor Green
         }
         catch{
@@ -76,19 +76,23 @@ function Vsix-UpdateBuildVersion {
         [Parameter(Position=0, Mandatory=1,ValueFromPipelineByPropertyName=$true)]
         [Version[]]$version,
         [Parameter(Position=1,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true)]
-        $vsixFilePath
+        $vsixFilePath,
+        [switch]$updateOnPullRequests
     ) 
     process{
-        foreach($ver in $version) {
-            if (Get-Command Update-AppveyorBuild -errorAction SilentlyContinue)
-            {
-                Write-Host "Updating AppVeyor build version..." -ForegroundColor Cyan -NoNewline
-                Update-AppveyorBuild -Version $ver | Out-Null
-                $ver | Write-Host -ForegroundColor Green
-            }
+        if ($updateOnPullRequests -or !$env:APPVEYOR_PULL_REQUEST_NUMBER){
 
-            $vsixFilePath
+            foreach($ver in $version) {
+                if (Get-Command Update-AppveyorBuild -errorAction SilentlyContinue)
+                {
+                    Write-Host "Updating AppVeyor build version..." -ForegroundColor Cyan -NoNewline
+                    Update-AppveyorBuild -Version $ver | Out-Null
+                    $ver | Write-Host -ForegroundColor Green
+                }
+            }
         }
+
+        $vsixFilePath
     }
 }
 
