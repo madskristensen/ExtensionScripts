@@ -121,8 +121,15 @@ function Vsix-IncrementVsixVersion {
 
             $ns = New-Object System.Xml.XmlNamespaceManager $vsixXml.NameTable
             $ns.AddNamespace("ns", $vsixXml.DocumentElement.NamespaceURI) | Out-Null
-
-            $attrVersion = $vsixXml.SelectSingleNode("//ns:Identity", $ns).Attributes["Version"]
+            
+            $attrVersion = ""            
+            
+            if ($vsixXml.SelectSingleNode("//ns:Identity", $ns)){ # VS2012 format
+                $attrVersion = $vsixXml.SelectSingleNode("//ns:Identity", $ns).Attributes["Version"]
+            }
+            elseif ($vsixXml.SelectSingleNode("//ns:Version", $ns)){ # VS2010 format
+                $attrVersion = $vsixXml.SelectSingleNode("//ns:Version", $ns)
+            }
 
             [Version]$version = $attrVersion.Value;
 
@@ -133,7 +140,13 @@ function Vsix-IncrementVsixVersion {
                 $version = New-Object Version ([int]$version.Major),([int]$version.Minor),([System.Math]::Max([int]$version.Build, 0)),$buildNumber
             }
         
-            $attrVersion.Value = $version
+            if ($attrVersion.InnerText){ # VS2010 format
+                $attrVersion.InnerText = $version
+            }
+            else {
+                $attrVersion.Value = $version
+            }
+
             $vsixXml.Save($vsixManifest) | Out-Null
 
             $version.ToString() | Write-Host -ForegroundColor Green
