@@ -60,7 +60,7 @@ function Vsix-PublishToGallery{
         [byte[]]$bytes = [System.IO.File]::ReadAllBytes($fileName)
     
         try {
-            #$response = Invoke-WebRequest $url -Method Post -Body $bytes
+            $response = Invoke-WebRequest $url -Method Post -Body $bytes
             'OK' | Write-Host -ForegroundColor Green
         }
         catch{
