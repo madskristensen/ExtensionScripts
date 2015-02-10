@@ -131,7 +131,11 @@ function Vsix-IncrementVsixVersion {
                 $attrVersion = $vsixXml.SelectSingleNode("//ns:Version", $ns)
             }
 
-            [Version]$version = $attrVersion.Value;
+            [Version]$version = $attrVersion.Value
+
+            if (!$attrVersion.Value){
+                $version = $attrVersion.InnerText
+            }
 
             if ($versionType -eq "build"){
                 $version = New-Object Version ([int]$version.Major),([int]$version.Minor),$buildNumber
@@ -140,13 +144,8 @@ function Vsix-IncrementVsixVersion {
                 $version = New-Object Version ([int]$version.Major),([int]$version.Minor),([System.Math]::Max([int]$version.Build, 0)),$buildNumber
             }
         
-            if ($attrVersion.InnerText){ # VS2010 format
-                $attrVersion.InnerText = $version
-            }
-            else {
-                $attrVersion.Value = $version
-            }
-
+            $attrVersion.InnerText = $version
+        
             $vsixXml.Save($vsixManifest) | Out-Null
 
             $version.ToString() | Write-Host -ForegroundColor Green
