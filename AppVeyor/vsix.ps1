@@ -219,7 +219,7 @@ function Vsix-TokenReplacement {
     )
     process {
 
-        if ($replacement -eq "{version}")
+        if ($replacement.Contains("{version}"))
         {
             $replacement = $replacement.Replace("{version}",  $env:APPVEYOR_BUILD_VERSION)
         }
