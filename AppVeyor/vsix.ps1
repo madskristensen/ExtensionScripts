@@ -171,11 +171,7 @@ function Vsix-IncrementNuspecVersion {
         [string[]]$nuspecFilePath = ".\**\*.nuspec",
 
         [Parameter(Position=1, Mandatory=0)]
-        [Version]$buildVersion = $env:APPVEYOR_BUILD_VERSION,
-
-        [ValidateSet("build","revision")]
-        [Parameter(Position=2, Mandatory=0)]
-        [string]$versionType = "build"
+        [Version]$buildVersion = $env:APPVEYOR_BUILD_VERSION
     )
     process {
         foreach($nuspecFile in $nuspecFilePath)
@@ -219,10 +215,7 @@ function Vsix-TokenReplacement {
     )
     process {
 
-        if ($replacement.Contains("{version}"))
-        {
-            $replacement = $replacement.Replace("{version}",  $env:APPVEYOR_BUILD_VERSION)
-        }
+        $replacement = $replacement.Replace("{version}",  $env:APPVEYOR_BUILD_VERSION)
         
         "Replacing $searchString with $replacement..." | Write-Host  -ForegroundColor Cyan -NoNewline
 
