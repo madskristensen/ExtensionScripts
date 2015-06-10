@@ -163,3 +163,74 @@ function Vsix-IncrementVsixVersion {
         }
     }
 }
+
+function Vsix-IncrementNuspecVersion {
+    [cmdletbinding()]
+    param (
+        [Parameter(Position=0, Mandatory=0)]
+        [string[]]$nuspecFilePath = ".\**\*.nuspec",
+
+        [Parameter(Position=1, Mandatory=0)]
+        [Version]$buildVersion = $env:APPVEYOR_BUILD_VERSION,
+
+        [ValidateSet("build","revision")]
+        [Parameter(Position=2, Mandatory=0)]
+        [string]$versionType = "build"
+    )
+    process {
+        foreach($nuspecFile in $nuspecFilePath)
+        {
+            "Incrementing Nuspec version..." | Write-Host  -ForegroundColor Cyan -NoNewline
+            $matches = (Get-ChildItem $nuspecFile -Recurse)
+            $nuspec = $matches[$matches.Count - 1] # Get the last one which matches the top most file in the recursive matches
+            [xml]$vsixXml = Get-Content $nuspec
+
+            $ns = New-Object System.Xml.XmlNamespaceManager $vsixXml.NameTable
+            $ns.AddNamespace("ns", $vsixXml.DocumentElement.NamespaceURI) | Out-Null
+            
+            $elmVersion =  $vsixXml.SelectSingleNode("//ns:version", $ns)
+            
+            $elmVersion.InnerText = $buildVersion
+        
+            $vsixXml.Save($nuspec) | Out-Null
+
+            $buildVersion.ToString() | Write-Host -ForegroundColor Green
+
+            # return the values to the pipeline
+            New-Object PSObject -Property @{
+                'vsixFilePath' = $nuspec
+                'Version' = $version
+            }
+        }
+    }
+}
+
+function Vsix-TokenReplacement {
+    [cmdletbinding()]
+    param (
+        [Parameter(Position=0, Mandatory=$true)]
+        [string]$FilePath,
+
+        [Parameter(Position=1, Mandatory=$true)]
+        [string]$searchString,
+
+        [Parameter(Position=2, Mandatory=$true)]
+        [string]$replacement
+    )
+    process {
+
+        if ($replacement -eq "{version}" -and $env:APPVEYOR -eq "True")
+        {
+            $replacement = $env:APPVEYOR_BUILD_VERSION
+        }
+        
+        "Replacing $searchString with $replacement..." | Write-Host  -ForegroundColor Cyan -NoNewline
+
+        $content = [string]::join([environment]::newline, (get-content $FilePath))        
+        $regex = New-Object System.Text.RegularExpressions.Regex $searchString
+        
+        $regex.Replace($content, $replacement) | Out-File $FilePath
+        
+        #[System.IO.File]::WriteAllText($file.FullName, $content);
+    }
+}
