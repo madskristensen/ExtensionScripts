@@ -219,9 +219,9 @@ function Vsix-TokenReplacement {
     )
     process {
 
-        if ($replacement -eq "{version}" -and $env:APPVEYOR -eq "True")
+        if ($replacement -eq "{version}")
         {
-            $replacement = $env:APPVEYOR_BUILD_VERSION
+            $replacement = $replacement.Replace("{version}",  $env:APPVEYOR_BUILD_VERSION)
         }
         
         "Replacing $searchString with $replacement..." | Write-Host  -ForegroundColor Cyan -NoNewline
