@@ -223,7 +223,5 @@ function Vsix-TokenReplacement {
         $regex = New-Object System.Text.RegularExpressions.Regex $searchString
         
         $regex.Replace($content, $replacement) | Out-File $FilePath
-        
-        #[System.IO.File]::WriteAllText($file.FullName, $content);
     }
 }
