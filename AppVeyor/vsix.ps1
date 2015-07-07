@@ -12,7 +12,7 @@ function Vsix-PushArtifacts {
         [string]$path = "./*.vsix",
 
         [switch]$publishToGallery
-    ) 
+    )
     process {
         foreach($filePath in $path) {
             $fileName = (Get-ChildItem $filePath -Recurse)[0] # Instead of taking the first, support multiple vsix files
@@ -37,7 +37,7 @@ function Vsix-PublishToGallery{
     param (
         [Parameter(Position=0, Mandatory=0,ValueFromPipeline=$true)]
         [string[]]$path = "./*.vsix"
-    ) 
+    )
     foreach($filePath in $path){
         if ($env:APPVEYOR_PULL_REQUEST_NUMBER){
             return
@@ -58,7 +58,7 @@ function Vsix-PublishToGallery{
 
         [string]$url = ($vsixUploadEndpoint + "?repo=" + $repo + "&issuetracker=" + $issueTracker)
         [byte[]]$bytes = [System.IO.File]::ReadAllBytes($fileName)
-    
+
         try {
             $response = Invoke-WebRequest $url -Method Post -Body $bytes
             'OK' | Write-Host -ForegroundColor Green
@@ -67,7 +67,7 @@ function Vsix-PublishToGallery{
             'FAIL' | Write-Error
             $_.Exception.Response.Headers["x-error"] | Write-Error
         }
-    }    
+    }
 }
 
 function Vsix-UpdateBuildVersion {
@@ -78,7 +78,7 @@ function Vsix-UpdateBuildVersion {
         [Parameter(Position=1,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true)]
         $vsixFilePath,
         [switch]$updateOnPullRequests
-    ) 
+    )
     process{
         if ($updateOnPullRequests -or !$env:APPVEYOR_PULL_REQUEST_NUMBER){
 
@@ -121,9 +121,9 @@ function Vsix-IncrementVsixVersion {
 
             $ns = New-Object System.Xml.XmlNamespaceManager $vsixXml.NameTable
             $ns.AddNamespace("ns", $vsixXml.DocumentElement.NamespaceURI) | Out-Null
-            
-            $attrVersion = ""            
-            
+
+            $attrVersion = ""
+
             if ($vsixXml.SelectSingleNode("//ns:Identity", $ns)){ # VS2012 format
                 $attrVersion = $vsixXml.SelectSingleNode("//ns:Identity", $ns).Attributes["Version"]
             }
@@ -143,9 +143,9 @@ function Vsix-IncrementVsixVersion {
             elseif ($versionType -eq "revision"){
                 $version = New-Object Version ([int]$version.Major),([int]$version.Minor),([System.Math]::Max([int]$version.Build, 0)),$buildNumber
             }
-        
+
             $attrVersion.InnerText = $version
-        
+
             $vsixXml.Save($vsixManifest) | Out-Null
 
             $version.ToString() | Write-Host -ForegroundColor Green
@@ -183,11 +183,11 @@ function Vsix-IncrementNuspecVersion {
 
             $ns = New-Object System.Xml.XmlNamespaceManager $vsixXml.NameTable
             $ns.AddNamespace("ns", $vsixXml.DocumentElement.NamespaceURI) | Out-Null
-            
+
             $elmVersion =  $vsixXml.SelectSingleNode("//ns:version", $ns)
-            
+
             $elmVersion.InnerText = $buildVersion
-        
+
             $vsixXml.Save($nuspec) | Out-Null
 
             $buildVersion.ToString() | Write-Host -ForegroundColor Green
@@ -216,12 +216,14 @@ function Vsix-TokenReplacement {
     process {
 
         $replacement = $replacement.Replace("{version}",  $env:APPVEYOR_BUILD_VERSION)
-        
-        "Replacing $searchString with $replacement..." | Write-Host  -ForegroundColor Cyan -NoNewline
 
-        $content = [string]::join([environment]::newline, (get-content $FilePath))        
+        "Replacing $searchString with $replacement..." | Write-Host -ForegroundColor Cyan -NoNewline
+
+        $content = [string]::join([environment]::newline, (get-content $FilePath))
         $regex = New-Object System.Text.RegularExpressions.Regex $searchString
-        
+
         $regex.Replace($content, $replacement) | Out-File $FilePath
+
+		"OK" | Write-Host -ForegroundColor Green
     }
 }
