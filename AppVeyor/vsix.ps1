@@ -48,8 +48,8 @@ function Vsix-PublishToGallery{
 
         if ($env:APPVEYOR_REPO_PROVIDER -contains "github"){
             [Reflection.Assembly]::LoadWithPartialName("System.Web") | Out-Null
-            $repo = [System.Web.HttpUtility]::UrlEncode(("https://github.com/" + $env:APPVEYOR_REPO_NAME + "/"))
-            $issueTracker = [System.Web.HttpUtility]::UrlEncode(($repo + "issues/"))
+            $repo = "https://github.com/" + [System.Web.HttpUtility]::UrlEncode($env:APPVEYOR_REPO_NAME) + "/"
+            $issueTracker = $repo + "issues/"
         }
 
         'Publish to VSIX Gallery...' | Write-Host -ForegroundColor Cyan -NoNewline
