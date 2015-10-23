@@ -275,7 +275,7 @@ function Vsix-CreateChocolatyPackage {
                 $PreviewImage = $vsixXml.SelectSingleNode("//ns:Tags", $ns).InnerText
             }
 
-            $folder = [System.IO.Path]::Combine([System.IO.Path]::GetDirectoryName($vsixManifest), ".vsixbuild")
+            $folder = [System.IO.Path]::Combine([System.IO.Path]::GetTempPath(), ".vsixbuild", "$id")
 
             [System.IO.Directory]::CreateDirectory($folder) | Out-Null
 
@@ -327,10 +327,9 @@ function Vsix-CreateChocolatyPackage {
             
             if (Get-Command Update-AppveyorBuild -errorAction SilentlyContinue)
             {
-                $nupkg = Get-ChildItem *.nupkg
+                $nupkg = Get-ChildItem $folder -Filter *.nupkg
                 Write-Host ("Pushing artifact " + $nupkg.Name + "...") -ForegroundColor Cyan -NoNewline
                 Push-AppveyorArtifact ($nupkg.FullName) -FileName $nupkg.Name -DeploymentName "Chocolatey package"
-                Write-Host "OK" -ForegroundColor Green
             }
 
             Pop-Location
