@@ -320,7 +320,7 @@ function Vsix-CreateChocolatyPackage {
             
             New-Item ($folder + "\chocolateyInstall.ps1") -type file -force -value $sb.ToString() | Out-Null
 
-            Push-Location ".vsixbuild"
+            Push-Location $folder
             & choco pack | Out-Null
 
             Write-Host "OK" -ForegroundColor Green
@@ -334,12 +334,6 @@ function Vsix-CreateChocolatyPackage {
             }
 
             Pop-Location
-
-            # return the values to the pipeline
-            New-Object PSObject -Property @{
-                'vsixFilePath' = $vsixManifest
-                'Version' = $version
-            }
         }
     }
 } 
