@@ -48,8 +48,8 @@ function Vsix-PublishToGallery{
 
         if ($env:APPVEYOR_REPO_PROVIDER -contains "github"){
             [Reflection.Assembly]::LoadWithPartialName("System.Web") | Out-Null
-            $repo = "https://github.com/" + [System.Web.HttpUtility]::UrlEncode($env:APPVEYOR_REPO_NAME) + "/"
-            $issueTracker = $repo + "issues/"
+            $repo = [System.Web.HttpUtility]::UrlEncode(("https://github.com/" + $env:APPVEYOR_REPO_NAME + "/"))
+            $issueTracker = [System.Web.HttpUtility]::UrlEncode(($repo + "issues/"))
         }
 
         'Publish to VSIX Gallery...' | Write-Host -ForegroundColor Cyan -NoNewline
@@ -321,7 +321,18 @@ function Vsix-CreateChocolatyPackage {
             New-Item ($folder + "\chocolateyInstall.ps1") -type file -force -value $sb.ToString() | Out-Null
 
             Push-Location ".vsixbuild"
-            & choco pack
+            & choco pack | Out-Null
+
+            Write-Host "OK" -ForegroundColor Green
+
+            if (Get-Command Update-AppveyorBuild -errorAction SilentlyContinue)
+            {
+                $nupkg = Get-ChildItem *.nupkg
+                Write-Host ("Pushing artifact " + $nupkg.Name + "...") -ForegroundColor Cyan -NoNewline
+                Push-AppveyorArtifact ($nupkg.FullName) -FileName $nupkg.Name -DeploymentName "Chocolatey package"
+                Write-Host "OK" -ForegroundColor Green
+            }
+
             Pop-Location
 
             # return the values to the pipeline
