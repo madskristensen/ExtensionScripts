@@ -289,7 +289,7 @@ function Vsix-CreateChocolatyPackage {
             $XmlWriter.WriteAttributeString("xmlns", "http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd")
 
             $xmlWriter.WriteStartElement("metadata")
-            $XmlWriter.WriteElementString("id", $displayName.Replace(' ', '').Replace('$', '').ToLowerInvariant())
+            $XmlWriter.WriteElementString("id", $id.ToLowerInvariant())
             $XmlWriter.WriteElementString("version", $version)
             $XmlWriter.WriteElementString("title", $displayName)
             $XmlWriter.WriteElementString("description", $description)
