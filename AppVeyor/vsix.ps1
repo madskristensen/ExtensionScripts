@@ -227,3 +227,108 @@ function Vsix-TokenReplacement {
 		"OK" | Write-Host -ForegroundColor Green
     }
 }
+
+function Vsix-CreateChocolatyPackage {
+    [cmdletbinding()]
+    param (
+        [Parameter(Position=0, Mandatory=0,ValueFromPipeline=$true)]
+        [string[]]$manifestFilePath = ".\source.extension.vsixmanifest"
+    )
+    process {
+        foreach($manifestFile in $manifestFilePath)
+        {
+            "Creating Cholocaty package..." | Write-Host  -ForegroundColor Cyan -NoNewline
+            $matches = (Get-ChildItem $manifestFile -Recurse)
+            $vsixManifest = $matches[$matches.Count - 1] # Get the last one which matches the top most file in the recursive matches
+            [xml]$vsixXml = Get-Content $vsixManifest
+
+            $ns = New-Object System.Xml.XmlNamespaceManager $vsixXml.NameTable
+            $ns.AddNamespace("ns", $vsixXml.DocumentElement.NamespaceURI) | Out-Null
+
+            $id = ""
+            $version = ""
+            $author = ""
+            $displayName = ""
+            $description = ""
+            $tags = ""
+            $icon = ""
+            $preview = ""
+
+            if ($vsixXml.SelectSingleNode("//ns:Identity", $ns)){ # VS2012 format
+                $id = $vsixXml.SelectSingleNode("//ns:Identity", $ns).Attributes["Id"].Value
+                $version = $vsixXml.SelectSingleNode("//ns:Identity", $ns).Attributes["Version"].Value
+                $author = $vsixXml.SelectSingleNode("//ns:Identity", $ns).Attributes["Publisher"].Value
+                $displayName = $vsixXml.SelectSingleNode("//ns:DisplayName", $ns).InnerText
+                $description = $vsixXml.SelectSingleNode("//ns:Description", $ns).InnerText
+                $tags = $vsixXml.SelectSingleNode("//ns:Tags", $ns).InnerText
+                $Icon = $vsixXml.SelectSingleNode("//ns:Tags", $ns).InnerText
+                $PreviewImage = $vsixXml.SelectSingleNode("//ns:Tags", $ns).InnerText
+            }
+            elseif ($vsixXml.SelectSingleNode("//ns:Version", $ns)){ # VS2010 format
+                $id = $vsixXml.SelectSingleNode("//ns:Identity", $ns).Attributes["Id"].Value
+                $version = $vsixXml.SelectSingleNode("//ns:Version", $ns).InnerText
+                $author = $vsixXml.SelectSingleNode("//ns:Author", $ns).InnerText
+                $displayName = $vsixXml.SelectSingleNode("//ns:Name", $ns).InnerText
+                $description = $vsixXml.SelectSingleNode("//ns:Description", $ns).InnerText
+                $tags = $vsixXml.SelectSingleNode("//ns:Tags", $ns).InnerText
+                $Icon = $vsixXml.SelectSingleNode("//ns:Tags", $ns).InnerText
+                $PreviewImage = $vsixXml.SelectSingleNode("//ns:Tags", $ns).InnerText
+            }
+
+            $folder = [System.IO.Path]::Combine([System.IO.Path]::GetDirectoryName($vsixManifest), ".vsixbuild")
+
+            [System.IO.Directory]::CreateDirectory($folder) | Out-Null
+
+            $XmlWriter = New-Object System.XMl.XmlTextWriter(($folder + "\chocolatey.nuspec"), (New-Object System.Text.UTF8Encoding))
+            $xmlWriter.Formatting = "Indented"
+            $xmlWriter.Indentation = "4"
+
+            $xmlWriter.WriteStartDocument()
+            $xmlWriter.WriteStartElement("package")
+            $XmlWriter.WriteAttributeString("xmlns", "http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd")
+
+            $xmlWriter.WriteStartElement("metadata")
+            $XmlWriter.WriteElementString("id", $displayName.Replace(" ", "").ToLowerInvariant())
+            $XmlWriter.WriteElementString("version", $version)
+            $XmlWriter.WriteElementString("title", $displayName)
+            $XmlWriter.WriteElementString("description", $description)
+            $XmlWriter.WriteElementString("authors", $author)
+            $XmlWriter.WriteElementString("owners", $author)
+            $XmlWriter.WriteElementString("licenseUrl", "http://vsixgallery.com/extension/" + $id + "/")
+            $XmlWriter.WriteElementString("projectUrl", "http://vsixgallery.com/extension/" + $id + "/")
+            #$XmlWriter.WriteElementString("iconUrl", "http://vsixgallery.com/extensions/" + $id + "/icon-" + $version + ".png")
+            $XmlWriter.WriteEndElement() # metadata
+
+            $XmlWriter.WriteStartElement("files")
+            $XmlWriter.WriteStartElement("file")
+            $XmlWriter.WriteAttributeString("src", "chocolateyInstall.ps1")
+            $XmlWriter.WriteAttributeString("target", "tools")
+            $XmlWriter.WriteEndElement() # file
+            $XmlWriter.WriteEndElement() # files
+
+            $xmlWriter.WriteEndElement() # package
+            $xmlWriter.WriteEndDocument()
+
+            $XmlWriter.Flush()
+            $XmlWriter.Dispose()
+
+            $sb = New-Object System.Text.StringBuilder
+            $sb.AppendLine("`$name = " + $displayName) | Out-Null
+            $sb.AppendLine("`$url = " + "http://vsixgallery.com/extension/" + $id + "/" + $displayName + ".vsix") | Out-Null
+            $sb.AppendLine("Install-ChocolateyVsixPackage `$name `$url") | Out-Null
+
+            
+            New-Item ($folder + "\chocolateyInstall.ps1") -type file -force -value $sb.ToString() | Out-Null
+
+            Push-Location ".vsixbuild"
+            & choco pack
+            Pop-Location
+
+            # return the values to the pipeline
+            New-Object PSObject -Property @{
+                'vsixFilePath' = $vsixManifest
+                'Version' = $version
+            }
+        }
+    }
+} 
