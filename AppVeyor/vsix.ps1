@@ -231,7 +231,7 @@ function Vsix-TokenReplacement {
 function Vsix-CreateChocolatyPackage {
     [cmdletbinding()]
     param (
-        [Parameter(Position=0, Mandatory=0,ValueFromPipeline=$true)]
+        [Parameter(Position=0, Mandatory=0)]
         [string[]]$manifestFilePath = ".\source.extension.vsixmanifest"
     )
     process {
@@ -324,7 +324,7 @@ function Vsix-CreateChocolatyPackage {
             & choco pack | Out-Null
 
             Write-Host "OK" -ForegroundColor Green
-
+            
             if (Get-Command Update-AppveyorBuild -errorAction SilentlyContinue)
             {
                 $nupkg = Get-ChildItem *.nupkg
