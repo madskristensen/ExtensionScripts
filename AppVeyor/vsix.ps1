@@ -327,10 +327,10 @@ function Vsix-CreateChocolatyPackage {
                 & choco pack | Out-Null
 
                 Write-Host "OK" -ForegroundColor Green
-            
+
                 if (Get-Command Update-AppveyorBuild -errorAction SilentlyContinue)
                 {
-                    $nupkg = Get-ChildItem $folder.FullName -Filter *.nupkg
+                    $nupkg = (Get-ChildItem $folder.FullName -Filter *.nupkg)[0]
                     Write-Host ("Pushing artifact " + $nupkg.Name + "...") -ForegroundColor Cyan -NoNewline
                     Push-AppveyorArtifact ($nupkg.FullName) -FileName $nupkg.Name -DeploymentName "Chocolatey package"
                     Write-Host "OK" -ForegroundColor Green
