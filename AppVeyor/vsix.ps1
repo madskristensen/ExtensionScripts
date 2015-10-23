@@ -276,7 +276,7 @@ function Vsix-CreateChocolatyPackage {
             }
 
             
-            [System.IO.DirectoryInfo]$folder = (Join-Path $pwd ".vsixbuild\$id")
+            [System.IO.DirectoryInfo]$folder = [System.IO.Path]::Combine([System.IO.Path]::GetTempPath(), ".vsixbuild", "$id")
 
             [System.IO.Directory]::CreateDirectory($folder.FullName) | Out-Null
 
