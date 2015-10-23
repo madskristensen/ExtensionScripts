@@ -275,11 +275,12 @@ function Vsix-CreateChocolatyPackage {
                 $PreviewImage = $vsixXml.SelectSingleNode("//ns:Tags", $ns).InnerText
             }
 
-            $folder = [System.IO.Path]::Combine([System.IO.Path]::GetTempPath(), ".vsixbuild", "$id")
+            
+            [System.IO.DirectoryInfo]$folder = (Join-Path $pwd ".vsixbuild\$id")
 
-            [System.IO.Directory]::CreateDirectory($folder) | Out-Null
+            [System.IO.Directory]::CreateDirectory($folder.FullName) | Out-Null
 
-            $XmlWriter = New-Object System.XMl.XmlTextWriter(($folder + "\chocolatey.nuspec"), (New-Object System.Text.UTF8Encoding))
+            $XmlWriter = New-Object System.XMl.XmlTextWriter(($folder.FullName + "\chocolatey.nuspec"), (New-Object System.Text.UTF8Encoding))
             $xmlWriter.Formatting = "Indented"
             $xmlWriter.Indentation = "4"
 
@@ -318,21 +319,26 @@ function Vsix-CreateChocolatyPackage {
             $sb.AppendLine("Install-ChocolateyVsixPackage `$name `$url") | Out-Null
 
             
-            New-Item ($folder + "\chocolateyInstall.ps1") -type file -force -value $sb.ToString() | Out-Null
+            New-Item ($folder.FullName + "\chocolateyInstall.ps1") -type file -force -value $sb.ToString() | Out-Null
 
-            Push-Location $folder
-            & choco pack | Out-Null
+            Push-Location $folder.FullName
 
-            Write-Host "OK" -ForegroundColor Green
+            try{
+                & choco pack | Out-Null
+
+                Write-Host "OK" -ForegroundColor Green
             
-            if (Get-Command Update-AppveyorBuild -errorAction SilentlyContinue)
-            {
-                $nupkg = Get-ChildItem $folder -Filter *.nupkg
-                Write-Host ("Pushing artifact " + $nupkg.Name + "...") -ForegroundColor Cyan -NoNewline
-                Push-AppveyorArtifact ($nupkg.FullName) -FileName $nupkg.Name -DeploymentName "Chocolatey package"
+                if (Get-Command Update-AppveyorBuild -errorAction SilentlyContinue)
+                {
+                    $nupkg = Get-ChildItem $folder.FullName -Filter *.nupkg
+                    Write-Host ("Pushing artifact " + $nupkg.Name + "...") -ForegroundColor Cyan -NoNewline
+                    Push-AppveyorArtifact ($nupkg.FullName) -FileName $nupkg.Name -DeploymentName "Chocolatey package"
+                    Write-Host "OK" -ForegroundColor Green
+                }
             }
-
-            Pop-Location
+            finally{
+                Pop-Location
+            }
         }
     }
 } 
