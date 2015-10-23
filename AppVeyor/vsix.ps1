@@ -221,7 +221,7 @@ function Vsix-TokenReplacement {
 
         $content = [string]::join([environment]::newline, (get-content $FilePath))
         $regex = New-Object System.Text.RegularExpressions.Regex $searchString
-
+        
         $regex.Replace($content, $replacement) | Out-File $FilePath
 
 		"OK" | Write-Host -ForegroundColor Green
@@ -288,8 +288,10 @@ function Vsix-CreateChocolatyPackage {
             $xmlWriter.WriteStartElement("package")
             $XmlWriter.WriteAttributeString("xmlns", "http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd")
 
+            [string]$cleanId = New-Object Regex.Replace($displayName, "[^a-zA-Z0-9-_]+", '')
+
             $xmlWriter.WriteStartElement("metadata")
-            $XmlWriter.WriteElementString("id", $id.ToLowerInvariant())
+            $XmlWriter.WriteElementString("id", $cleanId.ToLowerInvariant())
             $XmlWriter.WriteElementString("version", $version)
             $XmlWriter.WriteElementString("title", $displayName)
             $XmlWriter.WriteElementString("description", $description)
