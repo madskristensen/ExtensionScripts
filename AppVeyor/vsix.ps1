@@ -237,7 +237,7 @@ function Vsix-CreateChocolatyPackage {
     process {
         foreach($manifestFile in $manifestFilePath)
         {
-            "Creating Cholocaty package..." | Write-Host  -ForegroundColor Cyan -NoNewline
+            "Creating Cholocatey package..." | Write-Host  -ForegroundColor Cyan -NoNewline
             $matches = (Get-ChildItem $manifestFile -Recurse)
             $vsixManifest = $matches[$matches.Count - 1] # Get the last one which matches the top most file in the recursive matches
             [xml]$vsixXml = Get-Content $vsixManifest
