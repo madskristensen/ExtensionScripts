@@ -319,19 +319,19 @@ function Vsix-CreateChocolatyPackage {
             $sb.AppendLine("Install-ChocolateyVsixPackage `$name `$url") | Out-Null
 
             
-            New-Item ($folder.FullName + "\chocolateyInstall.ps1") -type file -force -value $sb.ToString()
+            New-Item ($folder.FullName + "\chocolateyInstall.ps1") -type file -force -value $sb.ToString() | Out-Null
 
             Push-Location $folder.FullName
 
             try{
-                & choco pack
+                & choco pack | Out-Null
 
                 Write-Host "OK" -ForegroundColor Green
 
                 if (Get-Command Update-AppveyorBuild -errorAction SilentlyContinue)
                 {
-                    $nupkg = (Get-ChildItem $folder.FullName -Filter *.nupkg)[0]
-                    Write-Host ("Pushing artifact " + $nupkg.Name + "...") -ForegroundColor Cyan -NoNewline
+                    $nupkg = Get-ChildItem $folder.FullName -Filter *.nupkg
+                    Write-Host ("Pushing Chocolatey package " + $nupkg.Name + "...") -ForegroundColor Cyan -NoNewline
                     Push-AppveyorArtifact ($nupkg.FullName) -FileName $nupkg.Name -DeploymentName "Chocolatey package"
                     Write-Host "OK" -ForegroundColor Green
                 }
