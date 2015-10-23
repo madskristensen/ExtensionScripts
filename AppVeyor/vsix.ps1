@@ -319,12 +319,12 @@ function Vsix-CreateChocolatyPackage {
             $sb.AppendLine("Install-ChocolateyVsixPackage `$name `$url") | Out-Null
 
             
-            New-Item ($folder.FullName + "\chocolateyInstall.ps1") -type file -force -value $sb.ToString() | Out-Null
+            New-Item ($folder.FullName + "\chocolateyInstall.ps1") -type file -force -value $sb.ToString()
 
             Push-Location $folder.FullName
 
             try{
-                & choco pack | Out-Null
+                & choco pack
 
                 Write-Host "OK" -ForegroundColor Green
 
