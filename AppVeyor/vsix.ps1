@@ -232,9 +232,17 @@ function Vsix-CreateChocolatyPackage {
     [cmdletbinding()]
     param (
         [Parameter(Position=0, Mandatory=0)]
-        [string[]]$manifestFilePath = ".\source.extension.vsixmanifest"
+        [string[]]$manifestFilePath = ".\source.extension.vsixmanifest",
+
+        [Parameter(Position=1, Mandatory=1)]
+        [string]$packageId
     )
     process {
+        
+        if ([String]::IsNullOrEmpty($pacakgeId)){
+            $error = New-Object System.ArgumentNullException "packageID is null or empty"
+        }
+
         foreach($manifestFile in $manifestFilePath)
         {
             "Creating Cholocatey package..." | Write-Host  -ForegroundColor Cyan -NoNewline
@@ -289,7 +297,7 @@ function Vsix-CreateChocolatyPackage {
             $XmlWriter.WriteAttributeString("xmlns", "http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd")
 
             $xmlWriter.WriteStartElement("metadata")
-            $XmlWriter.WriteElementString("id", $id.ToLowerInvariant())
+            $XmlWriter.WriteElementString("id", $packageId)
             $XmlWriter.WriteElementString("version", $version)
             $XmlWriter.WriteElementString("title", $displayName)
             $XmlWriter.WriteElementString("description", $description)
