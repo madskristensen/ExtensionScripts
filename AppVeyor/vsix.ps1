@@ -297,7 +297,7 @@ function Vsix-CreateChocolatyPackage {
             $XmlWriter.WriteElementString("owners", $author)
             $XmlWriter.WriteElementString("licenseUrl", "http://vsixgallery.com/extension/" + $id + "/")
             $XmlWriter.WriteElementString("projectUrl", "http://vsixgallery.com/extension/" + $id + "/")
-            #$XmlWriter.WriteElementString("iconUrl", "http://vsixgallery.com/extensions/" + $id + "/icon-" + $version + ".png")
+            $XmlWriter.WriteElementString("iconUrl", "http://vsixgallery.com/extensions/" + $id + "/icon.png")
             $XmlWriter.WriteEndElement() # metadata
 
             $XmlWriter.WriteStartElement("files")
