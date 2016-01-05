@@ -269,8 +269,6 @@ function Vsix-CreateChocolatyPackage {
                 $displayName = $vsixXml.SelectSingleNode("//ns:DisplayName", $ns).InnerText
                 $description = $vsixXml.SelectSingleNode("//ns:Description", $ns).InnerText
                 $tags = $vsixXml.SelectSingleNode("//ns:Tags", $ns).InnerText
-                $Icon = $vsixXml.SelectSingleNode("//ns:Tags", $ns).InnerText
-                $PreviewImage = $vsixXml.SelectSingleNode("//ns:Tags", $ns).InnerText
             }
             elseif ($vsixXml.SelectSingleNode("//ns:Version", $ns)){ # VS2010 format
                 $id = $vsixXml.SelectSingleNode("//ns:Identity", $ns).Attributes["Id"].Value
@@ -279,8 +277,6 @@ function Vsix-CreateChocolatyPackage {
                 $displayName = $vsixXml.SelectSingleNode("//ns:Name", $ns).InnerText
                 $description = $vsixXml.SelectSingleNode("//ns:Description", $ns).InnerText
                 $tags = $vsixXml.SelectSingleNode("//ns:Tags", $ns).InnerText
-                $Icon = $vsixXml.SelectSingleNode("//ns:Tags", $ns).InnerText
-                $PreviewImage = $vsixXml.SelectSingleNode("//ns:Tags", $ns).InnerText
             }
 
             
@@ -303,7 +299,7 @@ function Vsix-CreateChocolatyPackage {
             $XmlWriter.WriteElementString("description", $description)
             $XmlWriter.WriteElementString("authors", $author)
             $XmlWriter.WriteElementString("owners", $author)
-            $XmlWriter.WriteElementString("licenseUrl", "http://vsixgallery.com/extension/" + $id + "/")
+            $XmlWriter.WriteElementString("licenseUrl", "http://vsixgallery.com/extension/" + $id + "/#license")
             $XmlWriter.WriteElementString("projectUrl", "http://vsixgallery.com/extension/" + $id + "/")
             $XmlWriter.WriteElementString("iconUrl", "http://vsixgallery.com/extensions/" + $id + "/icon.png")
             $XmlWriter.WriteEndElement() # metadata
