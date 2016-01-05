@@ -259,8 +259,6 @@ function Vsix-CreateChocolatyPackage {
             $displayName = ""
             $description = ""
             $tags = ""
-            $icon = ""
-            $preview = ""
 
             if ($vsixXml.SelectSingleNode("//ns:Identity", $ns)){ # VS2012 format
                 $id = $vsixXml.SelectSingleNode("//ns:Identity", $ns).Attributes["Id"].Value
@@ -278,16 +276,7 @@ function Vsix-CreateChocolatyPackage {
                 $description = $vsixXml.SelectSingleNode("//ns:Description", $ns).InnerText
                 $tags = $vsixXml.SelectSingleNode("//ns:Tags", $ns).InnerText
             }
-
-            $repo = ""
-            $issueTracker = ""
-
-            if ($env:APPVEYOR_REPO_PROVIDER -contains "github"){
-                [Reflection.Assembly]::LoadWithPartialName("System.Web") | Out-Null
-                $repo = [System.Web.HttpUtility]::UrlEncode(("https://github.com/" + $env:APPVEYOR_REPO_NAME + "/"))
-                $issueTracker = [System.Web.HttpUtility]::UrlEncode(($repo + "issues/"))
-            }
-
+            
             
             [System.IO.DirectoryInfo]$folder = [System.IO.Path]::Combine([System.IO.Path]::GetTempPath(), ".vsixbuild", "$id")
 
@@ -308,12 +297,20 @@ function Vsix-CreateChocolatyPackage {
             $XmlWriter.WriteElementString("description", $description)
             $XmlWriter.WriteElementString("authors", $author)
             $XmlWriter.WriteElementString("owners", $author)
-            $XmlWriter.WriteElementString("packageSourceUrl", $repo)
-            $XmlWriter.WriteElementString("projectSourceUrl", $repo)
-            $XmlWriter.WriteElementString("bugTrackerUrl  ", $issueTracker)
             $XmlWriter.WriteElementString("licenseUrl", "http://vsixgallery.com/extension/" + $id + "/#license")
             $XmlWriter.WriteElementString("projectUrl", "http://vsixgallery.com/extension/" + $id + "/")
             $XmlWriter.WriteElementString("iconUrl", "http://vsixgallery.com/extensions/" + $id + "/icon.png")
+
+            if ($env:APPVEYOR_REPO_PROVIDER -contains "github"){
+                [Reflection.Assembly]::LoadWithPartialName("System.Web") | Out-Null
+                $repo = [System.Web.HttpUtility]::UrlEncode(("https://github.com/" + $env:APPVEYOR_REPO_NAME + "/"))
+                $issueTracker = [System.Web.HttpUtility]::UrlEncode(($repo + "issues/"))
+
+                $XmlWriter.WriteElementString("packageSourceUrl", $repo)
+                $XmlWriter.WriteElementString("projectSourceUrl", $repo)
+                $XmlWriter.WriteElementString("bugTrackerUrl  ", $issueTracker)
+            }
+
             $XmlWriter.WriteEndElement() # metadata
 
             $XmlWriter.WriteStartElement("files")
