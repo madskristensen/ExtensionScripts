@@ -306,17 +306,6 @@ function Vsix-CreateChocolatyPackage {
             $XmlWriter.WriteElementString("licenseUrl", "http://vsixgallery.com/extension/" + $id + "/#license")
             $XmlWriter.WriteElementString("projectUrl", "http://vsixgallery.com/extension/" + $id + "/")
             $XmlWriter.WriteElementString("iconUrl", "http://vsixgallery.com/extensions/" + $id + "/icon.png")
-
-            if ($env:APPVEYOR_REPO_PROVIDER -contains "github"){
-                [Reflection.Assembly]::LoadWithPartialName("System.Web") | Out-Null
-                $repo = [System.Web.HttpUtility]::UrlEncode(("https://github.com/" + $env:APPVEYOR_REPO_NAME + "/"))
-                $issueTracker = [System.Web.HttpUtility]::UrlEncode(($repo + "issues/"))
-
-                $XmlWriter.WriteElementString("packageSourceUrl", $repo)
-                $XmlWriter.WriteElementString("projectSourceUrl", $repo)
-                $XmlWriter.WriteElementString("bugTrackerUrl", $issueTracker)
-            }
-
             $XmlWriter.WriteEndElement() # metadata
 
             $XmlWriter.WriteStartElement("files")
