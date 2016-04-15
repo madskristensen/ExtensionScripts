@@ -15,18 +15,21 @@ function Vsix-PushArtifacts {
     )
     process {
         foreach($filePath in $path) {
-            $fileName = (Get-ChildItem $filePath -Recurse)[0] # Instead of taking the first, support multiple vsix files
-
-            if (Get-Command Update-AppveyorBuild -errorAction SilentlyContinue)
+            $fileNames = (Get-ChildItem $filePath -Recurse)
+            
+            foreach($vsixFile in $fileNames)
             {
-                Write-Host ("Pushing artifact " + $fileName.Name + "...") -ForegroundColor Cyan -NoNewline
-                Push-AppveyorArtifact ($fileName.FullName) -FileName $fileName.Name -DeploymentName "Latest build"
-                Write-Host "OK" -ForegroundColor Green
-            }
+                if (Get-Command Update-AppveyorBuild -errorAction SilentlyContinue)
+                {
+                    Write-Host ("Pushing artifact " + $vsixFile.Name + "...") -ForegroundColor Cyan -NoNewline
+                    Push-AppveyorArtifact ($vsixFile.FullName) -FileName $vsixFile.Name -DeploymentName "Latest build"
+                    Write-Host "OK" -ForegroundColor Green
+                }
 
-            if ($publishToGallery -and $fileName)
-            {
-                Vsix-PublishToGallery $fileName.FullName
+                if ($publishToGallery -and $vsixFile)
+                {
+                    Vsix-PublishToGallery $vsixFile.FullName
+                }
             }
         }
     }
@@ -54,18 +57,21 @@ function Vsix-PublishToGallery{
 
         'Publish to VSIX Gallery...' | Write-Host -ForegroundColor Cyan -NoNewline
 
-        $fileName = (Get-ChildItem $filePath -Recurse)[0] # Instead of taking the first, support multiple vsix files
+        $fileNames = (Get-ChildItem $filePath -Recurse)
 
-        [string]$url = ($vsixUploadEndpoint + "?repo=" + $repo + "&issuetracker=" + $issueTracker)
-        [byte[]]$bytes = [System.IO.File]::ReadAllBytes($fileName)
+        foreach($vsixFile in $fileNames)
+        {
+            [string]$url = ($vsixUploadEndpoint + "?repo=" + $repo + "&issuetracker=" + $issueTracker)
+            [byte[]]$bytes = [System.IO.File]::ReadAllBytes($vsixFile)
 
-        try {
-            $response = Invoke-WebRequest $url -Method Post -Body $bytes
-            'OK' | Write-Host -ForegroundColor Green
-        }
-        catch{
-            'FAIL' | Write-Error
-            $_.Exception.Response.Headers["x-error"] | Write-Error
+            try {
+                $response = Invoke-WebRequest $url -Method Post -Body $bytes
+                'OK' | Write-Host -ForegroundColor Green
+            }
+            catch{
+                'FAIL' | Write-Error
+                $_.Exception.Response.Headers["x-error"] | Write-Error
+            }
         }
     }
 }
