@@ -53,6 +53,10 @@ function Vsix-PublishToGallery{
             [Reflection.Assembly]::LoadWithPartialName("System.Web") | Out-Null
             $repo = [System.Web.HttpUtility]::UrlEncode(("https://github.com/" + $env:APPVEYOR_REPO_NAME + "/"))
             $issueTracker = [System.Web.HttpUtility]::UrlEncode(($repo + "issues/"))
+        } elseif ($env:APPVEYOR_REPO_PROVIDER -contains "bitbucket"){
+            [Reflection.Assembly]::LoadWithPartialName("System.Web") | Out-Null
+            $repo = [System.Web.HttpUtility]::UrlEncode(("https://bitbucket.org/" + $env:APPVEYOR_REPO_NAME + "/"))
+            $issueTracker = [System.Web.HttpUtility]::UrlEncode(($repo + "issues/"))
         }
 
         'Publish to VSIX Gallery...' | Write-Host -ForegroundColor Cyan -NoNewline
