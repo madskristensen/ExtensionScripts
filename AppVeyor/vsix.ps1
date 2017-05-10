@@ -35,6 +35,19 @@ function Vsix-PushArtifacts {
     }
 }
 
+function Vsix-GetRepoUrl{
+    [cmdletbinding()]
+    param ()
+    if ($env:APPVEYOR_REPO_PROVIDER -contains "github"){
+        $repoUrl = "https://github.com/" + $env:APPVEYOR_REPO_NAME + "/"
+    } elseif ($env:APPVEYOR_REPO_PROVIDER -contains "bitbucket"){
+        $repoUrl = "https://bitbucket.org/" + $env:APPVEYOR_REPO_NAME + "/"
+    } else {
+        $repoUrl = ""
+    }
+    return $repoUrl
+}
+
 function Vsix-PublishToGallery{
     [cmdletbinding()]
     param (
@@ -49,13 +62,10 @@ function Vsix-PublishToGallery{
         $repo = ""
         $issueTracker = ""
 
-        if ($env:APPVEYOR_REPO_PROVIDER -contains "github"){
+        $repoUrl = Vsix-GetRepoUrl
+        if ($baseRepoUrl -ne "") {
             [Reflection.Assembly]::LoadWithPartialName("System.Web") | Out-Null
-            $repo = [System.Web.HttpUtility]::UrlEncode(("https://github.com/" + $env:APPVEYOR_REPO_NAME + "/"))
-            $issueTracker = [System.Web.HttpUtility]::UrlEncode(($repo + "issues/"))
-        } elseif ($env:APPVEYOR_REPO_PROVIDER -contains "bitbucket"){
-            [Reflection.Assembly]::LoadWithPartialName("System.Web") | Out-Null
-            $repo = [System.Web.HttpUtility]::UrlEncode(("https://bitbucket.org/" + $env:APPVEYOR_REPO_NAME + "/"))
+            $repo = System.Web.HttpUtility]::UrlEncode($repoUrl)
             $issueTracker = [System.Web.HttpUtility]::UrlEncode(($repo + "issues/"))
         }
 
@@ -258,6 +268,11 @@ function Vsix-CreateChocolatyPackage {
             "Creating Cholocatey package..." | Write-Host  -ForegroundColor Cyan -NoNewline
             $matches = (Get-ChildItem $manifestFile -Recurse)
             $vsixManifest = $matches[$matches.Count - 1] # Get the last one which matches the top most file in the recursive matches
+
+            $vsixManifestDirectory = Split-Path -Parent -Path $vsixManifest
+            $vsixFile = Get-ChildItem -Path $vsixManifestDirectory -Filter '*.vsix' -Recurse | Select-Object -First 1
+            $hash = $vsixFile | Get-FileHash -Algorithm SHA256 | Select-Object -ExpandProperty Hash
+
             [xml]$vsixXml = Get-Content $vsixManifest
 
             $ns = New-Object System.Xml.XmlNamespaceManager $vsixXml.NameTable
@@ -271,6 +286,7 @@ function Vsix-CreateChocolatyPackage {
             $tags = ""
             $icon = ""
             $preview = ""
+            $repoUrl = Vsix-GetRepoUrl
 
             if ($vsixXml.SelectSingleNode("//ns:Identity", $ns)){ # VS2012 format
                 $id = $vsixXml.SelectSingleNode("//ns:Identity", $ns).Attributes["Id"].Value
@@ -317,6 +333,7 @@ function Vsix-CreateChocolatyPackage {
             $XmlWriter.WriteElementString("licenseUrl", "http://vsixgallery.com/extension/" + $id + "/")
             $XmlWriter.WriteElementString("projectUrl", "http://vsixgallery.com/extension/" + $id + "/")
             $XmlWriter.WriteElementString("iconUrl", "http://vsixgallery.com/extensions/" + $id + "/icon.png")
+            $XmlWriter.WriteElementString("packageSourceUrl", $repoUrl)
             $XmlWriter.WriteEndElement() # metadata
 
             $XmlWriter.WriteStartElement("files")
@@ -334,8 +351,10 @@ function Vsix-CreateChocolatyPackage {
 
             $sb = New-Object System.Text.StringBuilder
             $sb.AppendLine("`$name = `'" + $displayName + "`'") | Out-Null
-            $sb.AppendLine("`$url = `'" + "http://vsixgallery.com/extensions/" + $id + "/" + $displayName + ".vsix`'") | Out-Null
-            $sb.AppendLine("Install-ChocolateyVsixPackage `$name `$url") | Out-Null
+            $sb.AppendLine("`$url = `'" + "https://vsixgallery.azurewebsites.net/extensions/" + $id + "/" + $displayName + ".vsix`'") | Out-Null
+            $sb.AppendLine("`$checksum = `'" + $hash + "`'") | Out-Null
+            $sb.AppendLine("`$checksumType = `'SHA256`'") | Out-Null
+            $sb.AppendLine("Install-ChocolateyVsixPackage `$name `$url -Checksum `$checksum -ChecksumType `$checksumType") | Out-Null
 
             
             New-Item ($folder.FullName + "\chocolateyInstall.ps1") -type file -force -value $sb.ToString() | Out-Null
