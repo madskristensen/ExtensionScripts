@@ -346,7 +346,7 @@ function Vsix-CreateChocolatyPackage {
 
             $sb = New-Object System.Text.StringBuilder
             $sb.AppendLine("`$name = `'" + $displayName + "`'") | Out-Null
-            $sb.AppendLine("`$url = `'" + "http://vsixgallery.com/extensions/" + $id + "/" + $displayName + ".vsix`'") | Out-Null
+            $sb.AppendLine("`$url = `'" + "https://vsixgallery.azurewebsites.net/extensions/" + $id + "/" + $displayName + ".vsix`'") | Out-Null
             $sb.AppendLine("Install-ChocolateyVsixPackage `$name `$url") | Out-Null
 
             
