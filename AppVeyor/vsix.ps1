@@ -35,6 +35,19 @@ function Vsix-PushArtifacts {
     }
 }
 
+function Vsix-GetRepoUrl{
+    [cmdletbinding()]
+    param ()
+    if ($env:APPVEYOR_REPO_PROVIDER -contains "github"){
+        $repoUrl = "https://github.com/" + $env:APPVEYOR_REPO_NAME + "/"
+    } elseif ($env:APPVEYOR_REPO_PROVIDER -contains "bitbucket"){
+        $repoUrl = "https://bitbucket.org/" + $env:APPVEYOR_REPO_NAME + "/"
+    } else {
+        $repoUrl = ""
+    }
+    return $repoUrl
+}
+
 function Vsix-PublishToGallery{
     [cmdletbinding()]
     param (
@@ -49,13 +62,10 @@ function Vsix-PublishToGallery{
         $repo = ""
         $issueTracker = ""
 
-        if ($env:APPVEYOR_REPO_PROVIDER -contains "github"){
+        $repoUrl = Vsix-GetRepoUrl
+        if ($baseRepoUrl -ne "") {
             [Reflection.Assembly]::LoadWithPartialName("System.Web") | Out-Null
-            $repo = [System.Web.HttpUtility]::UrlEncode(("https://github.com/" + $env:APPVEYOR_REPO_NAME + "/"))
-            $issueTracker = [System.Web.HttpUtility]::UrlEncode(($repo + "issues/"))
-        } elseif ($env:APPVEYOR_REPO_PROVIDER -contains "bitbucket"){
-            [Reflection.Assembly]::LoadWithPartialName("System.Web") | Out-Null
-            $repo = [System.Web.HttpUtility]::UrlEncode(("https://bitbucket.org/" + $env:APPVEYOR_REPO_NAME + "/"))
+            $repo = System.Web.HttpUtility]::UrlEncode($repoUrl)
             $issueTracker = [System.Web.HttpUtility]::UrlEncode(($repo + "issues/"))
         }
 
@@ -271,6 +281,7 @@ function Vsix-CreateChocolatyPackage {
             $tags = ""
             $icon = ""
             $preview = ""
+            $repoUrl = Vsix-GetRepoUrl
 
             if ($vsixXml.SelectSingleNode("//ns:Identity", $ns)){ # VS2012 format
                 $id = $vsixXml.SelectSingleNode("//ns:Identity", $ns).Attributes["Id"].Value
@@ -317,6 +328,7 @@ function Vsix-CreateChocolatyPackage {
             $XmlWriter.WriteElementString("licenseUrl", "http://vsixgallery.com/extension/" + $id + "/")
             $XmlWriter.WriteElementString("projectUrl", "http://vsixgallery.com/extension/" + $id + "/")
             $XmlWriter.WriteElementString("iconUrl", "http://vsixgallery.com/extensions/" + $id + "/icon.png")
+            $XmlWriter.WriteElementString("packageSourceUrl", $repoUrl)
             $XmlWriter.WriteEndElement() # metadata
 
             $XmlWriter.WriteStartElement("files")
