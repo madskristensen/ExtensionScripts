@@ -268,6 +268,11 @@ function Vsix-CreateChocolatyPackage {
             "Creating Cholocatey package..." | Write-Host  -ForegroundColor Cyan -NoNewline
             $matches = (Get-ChildItem $manifestFile -Recurse)
             $vsixManifest = $matches[$matches.Count - 1] # Get the last one which matches the top most file in the recursive matches
+
+            $vsixManifestDirectory = Split-Path -Parent -Path $vsixManifest
+            $vsixFile = Get-ChildItem -Path $vsixManifestDirectory -Filter '*.vsix' -Recurse | Select-Object -First 1
+            $hash = $vsixFile | Get-FileHash -Algorithm SHA256 | Select-Object -ExpandProperty Hash
+
             [xml]$vsixXml = Get-Content $vsixManifest
 
             $ns = New-Object System.Xml.XmlNamespaceManager $vsixXml.NameTable
@@ -347,7 +352,9 @@ function Vsix-CreateChocolatyPackage {
             $sb = New-Object System.Text.StringBuilder
             $sb.AppendLine("`$name = `'" + $displayName + "`'") | Out-Null
             $sb.AppendLine("`$url = `'" + "https://vsixgallery.azurewebsites.net/extensions/" + $id + "/" + $displayName + ".vsix`'") | Out-Null
-            $sb.AppendLine("Install-ChocolateyVsixPackage `$name `$url") | Out-Null
+            $sb.AppendLine("`$checksum = `'" + $hash + "`'") | Out-Null
+            $sb.AppendLine("`$checksumType = `'SHA256`'") | Out-Null
+            $sb.AppendLine("Install-ChocolateyVsixPackage `$name `$url -Checksum `$checksum -ChecksumType `$checksumType") | Out-Null
 
             
             New-Item ($folder.FullName + "\chocolateyInstall.ps1") -type file -force -value $sb.ToString() | Out-Null
