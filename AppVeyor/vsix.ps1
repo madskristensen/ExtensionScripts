@@ -65,7 +65,7 @@ function Vsix-PublishToGallery{
         $repoUrl = Vsix-GetRepoUrl
         if ($baseRepoUrl -ne "") {
             [Reflection.Assembly]::LoadWithPartialName("System.Web") | Out-Null
-            $repo = System.Web.HttpUtility]::UrlEncode($repoUrl)
+            $repo = [System.Web.HttpUtility]::UrlEncode($repoUrl)
             $issueTracker = [System.Web.HttpUtility]::UrlEncode(($repo + "issues/"))
         }
 
