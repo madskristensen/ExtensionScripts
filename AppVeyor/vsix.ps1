@@ -66,7 +66,7 @@ function Vsix-PublishToGallery{
         if ($baseRepoUrl -ne "") {
             [Reflection.Assembly]::LoadWithPartialName("System.Web") | Out-Null
             $repo = [System.Web.HttpUtility]::UrlEncode($repoUrl)
-            $issueTracker = [System.Web.HttpUtility]::UrlEncode(($repo + "issues/"))
+            $issueTracker = [System.Web.HttpUtility]::UrlEncode(($repoUrl + "issues/"))
         }
 
         'Publish to VSIX Gallery...' | Write-Host -ForegroundColor Cyan -NoNewline
