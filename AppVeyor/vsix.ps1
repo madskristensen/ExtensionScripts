@@ -16,7 +16,7 @@ function Vsix-PushArtifacts {
     process {
         foreach($filePath in $path) {
             $fileNames = (Get-ChildItem $filePath -Recurse)
-            
+
             foreach($vsixFile in $fileNames)
             {
                 if (Get-Command Update-AppveyorBuild -errorAction SilentlyContinue)
@@ -241,7 +241,7 @@ function Vsix-TokenReplacement {
 
         $content = [string]::join([environment]::newline, (get-content $FilePath))
         $regex = New-Object System.Text.RegularExpressions.Regex $searchString
-        
+
         $regex.Replace($content, $replacement) | Out-File $FilePath
 
 		"OK" | Write-Host -ForegroundColor Green
@@ -258,7 +258,7 @@ function Vsix-CreateChocolatyPackage {
         [string]$packageId
     )
     process {
-        
+
         if ([String]::IsNullOrEmpty($pacakgeId)){
             $error = New-Object System.ArgumentNullException "packageID is null or empty"
         }
@@ -308,8 +308,8 @@ function Vsix-CreateChocolatyPackage {
                 $Icon = $vsixXml.SelectSingleNode("//ns:Tags", $ns).InnerText
                 $PreviewImage = $vsixXml.SelectSingleNode("//ns:Tags", $ns).InnerText
             }
-            
-            
+
+
             [System.IO.DirectoryInfo]$folder = [System.IO.Path]::Combine([System.IO.Path]::GetTempPath(), ".vsixbuild", "$id")
 
             [System.IO.Directory]::CreateDirectory($folder.FullName) | Out-Null
@@ -334,6 +334,12 @@ function Vsix-CreateChocolatyPackage {
             $XmlWriter.WriteElementString("projectUrl", "http://vsixgallery.com/extension/" + $id + "/")
             $XmlWriter.WriteElementString("iconUrl", "http://vsixgallery.com/extensions/" + $id + "/icon.png")
             $XmlWriter.WriteElementString("packageSourceUrl", $repoUrl)
+            $XmlWriter.WriteStartElement("dependencies")
+            $XmlWriter.WriteStartElement("dependency")
+            $XmlWriter.WriteAttributeString("id", "chocolatey-visualstudio.extension")
+            $XmlWriter.WriteAttributeString("version", "1.6.0")
+            $XmlWriter.WriteEndElement() # dependency
+            $XmlWriter.WriteEndElement() # dependencies
             $XmlWriter.WriteEndElement() # metadata
 
             $XmlWriter.WriteStartElement("files")
@@ -354,9 +360,9 @@ function Vsix-CreateChocolatyPackage {
             $sb.AppendLine("`$url = `'" + "https://vsixgallery.azurewebsites.net/extensions/" + $id + "/" + $displayName + ".vsix`'") | Out-Null
             $sb.AppendLine("`$checksum = `'" + $hash + "`'") | Out-Null
             $sb.AppendLine("`$checksumType = `'SHA256`'") | Out-Null
-            $sb.AppendLine("Install-ChocolateyVsixPackage `$name `$url -Checksum `$checksum -ChecksumType `$checksumType") | Out-Null
+            $sb.AppendLine("Install-VisualStudioVsixExtension `$name `$url -Checksum `$checksum -ChecksumType `$checksumType") | Out-Null
 
-            
+
             New-Item ($folder.FullName + "\chocolateyInstall.ps1") -type file -force -value $sb.ToString() | Out-Null
 
             Push-Location $folder.FullName
@@ -379,4 +385,4 @@ function Vsix-CreateChocolatyPackage {
             }
         }
     }
-} 
+}
