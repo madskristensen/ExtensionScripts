@@ -2,7 +2,7 @@
 [cmdletbinding()]
 param()
 
-$vsixUploadEndpoint = "http://vsixgallery.com/api/upload"
+$vsixUploadEndpoint = "https://www.vsixgallery.com/api/upload"
 #$vsixUploadEndpoint = "https://localhost:44372/api/upload"
 
 function Vsix-PushArtifacts {
