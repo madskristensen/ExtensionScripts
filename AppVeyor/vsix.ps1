@@ -3,7 +3,7 @@
 param()
 
 $vsixUploadEndpoint = "http://vsixgallery.com/api/upload"
-#$vsixUploadEndpoint = "http://localhost:7035/api/upload"
+#$vsixUploadEndpoint = "https://localhost:44372/api/upload"
 
 function Vsix-PushArtifacts {
     [cmdletbinding()]
@@ -77,9 +77,10 @@ function Vsix-PublishToGallery{
         {
             [string]$url = ($vsixUploadEndpoint + "?repo=" + $repo + "&issuetracker=" + $issueTracker)
             [byte[]]$bytes = [System.IO.File]::ReadAllBytes($vsixFile)
-
+             
             try {
-                $response = Invoke-WebRequest $url -Method Post -Body $bytes -UseBasicParsing
+                $webclient = New-Object System.Net.WebClient
+                $webclient.UploadFile($url, $vsixFile) | Out-Null
                 'OK' | Write-Host -ForegroundColor Green
             }
             catch{
