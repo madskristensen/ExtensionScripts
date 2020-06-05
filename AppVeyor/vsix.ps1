@@ -68,6 +68,10 @@ function Vsix-PublishToGallery{
             $repo = [System.Web.HttpUtility]::UrlEncode($repoUrl)
             $issueTracker = [System.Web.HttpUtility]::UrlEncode(($repoUrl + "issues/"))
         }
+	
+        if ([Net.ServicePointManager]::SecurityProtocol -notcontains 'Tls12') {
+            [Net.ServicePointManager]::SecurityProtocol += [Net.SecurityProtocolType]::Tls12
+        }
 
         'Publish to VSIX Gallery...' | Write-Host -ForegroundColor Cyan -NoNewline
 
