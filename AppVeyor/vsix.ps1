@@ -15,7 +15,7 @@ function Vsix-PushArtifacts {
     )
     process {
         foreach($filePath in $path) {
-            $fileNames = (Get-ChildItem $filePath -Recurse)
+            $fileNames = (Get-ChildItem $filePath -Recurse -File)
 
             foreach($vsixFile in $fileNames)
             {
@@ -71,7 +71,7 @@ function Vsix-PublishToGallery{
 
         'Publish to VSIX Gallery...' | Write-Host -ForegroundColor Cyan -NoNewline
 
-        $fileNames = (Get-ChildItem $filePath -Recurse)
+        $fileNames = (Get-ChildItem $filePath -Recurse -File)
 
         foreach($vsixFile in $fileNames)
         {
@@ -136,7 +136,7 @@ function Vsix-IncrementVsixVersion {
         foreach($manifestFile in $manifestFilePath)
         {
             "Incrementing VSIX version..." | Write-Host  -ForegroundColor Cyan -NoNewline
-            $matches = (Get-ChildItem $manifestFile -Recurse)
+            $matches = (Get-ChildItem $manifestFile -Recurse -File)
             $vsixManifest = $matches[$matches.Count - 1] # Get the last one which matches the top most file in the recursive matches
             [xml]$vsixXml = Get-Content $vsixManifest
 
@@ -198,7 +198,7 @@ function Vsix-IncrementNuspecVersion {
         foreach($nuspecFile in $nuspecFilePath)
         {
             "Incrementing Nuspec version..." | Write-Host  -ForegroundColor Cyan -NoNewline
-            $matches = (Get-ChildItem $nuspecFile -Recurse)
+            $matches = (Get-ChildItem $nuspecFile -Recurse -File)
             $nuspec = $matches[$matches.Count - 1] # Get the last one which matches the top most file in the recursive matches
             [xml]$vsixXml = Get-Content $nuspec
 
@@ -267,11 +267,11 @@ function Vsix-CreateChocolatyPackage {
         foreach($manifestFile in $manifestFilePath)
         {
             "Creating Cholocatey package..." | Write-Host  -ForegroundColor Cyan -NoNewline
-            $matches = (Get-ChildItem $manifestFile -Recurse)
+            $matches = (Get-ChildItem $manifestFile -Recurse -File)
             $vsixManifest = $matches[$matches.Count - 1] # Get the last one which matches the top most file in the recursive matches
 
             $vsixManifestDirectory = Split-Path -Parent -Path $vsixManifest
-            $vsixFile = Get-ChildItem -Path $vsixManifestDirectory -Filter '*.vsix' -Recurse | Select-Object -First 1
+            $vsixFile = Get-ChildItem -Path $vsixManifestDirectory -Filter '*.vsix' -Recurse -File | Select-Object -First 1
             $hash = $vsixFile | Get-FileHash -Algorithm SHA256 | Select-Object -ExpandProperty Hash
 
             [xml]$vsixXml = Get-Content $vsixManifest
@@ -375,7 +375,7 @@ function Vsix-CreateChocolatyPackage {
 
                 if (Get-Command Update-AppveyorBuild -errorAction SilentlyContinue)
                 {
-                    $nupkg = Get-ChildItem $folder.FullName -Filter *.nupkg
+                    $nupkg = Get-ChildItem $folder.FullName -Filter *.nupkg -File
                     Write-Host ("Pushing Chocolatey package " + $nupkg.Name + "...") -ForegroundColor Cyan -NoNewline
                     Push-AppveyorArtifact ($nupkg.FullName) -FileName $nupkg.Name -DeploymentName "Chocolatey package"
                     Write-Host "OK" -ForegroundColor Green
