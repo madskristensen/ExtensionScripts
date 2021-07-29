@@ -52,7 +52,8 @@ function Vsix-PublishToGallery{
     [cmdletbinding()]
     param (
         [Parameter(Position=0, Mandatory=0,ValueFromPipeline=$true)]
-        [string[]]$path = "./*.vsix"
+        [string[]]$path = "./*.vsix",
+        [string]$readmeUrl = ""
     )
     foreach($filePath in $path){
         if ($env:APPVEYOR_PULL_REQUEST_NUMBER){
@@ -62,11 +63,21 @@ function Vsix-PublishToGallery{
         $repo = ""
         $issueTracker = ""
 
+        # If no readme URL was specified, default to "<branch_name>/README.md"
+        if (-not $readmeUrl) {
+            if ($env:APPVEYOR_REPO_BRANCH) {
+                $readmeUrl = $env:APPVEYOR_REPO_BRANCH + "/README.md"
+            } else {
+                $readmeUrl = "master/README.md"
+            }
+        }
+
         $repoUrl = Vsix-GetRepoUrl
         if ($baseRepoUrl -ne "") {
             [Reflection.Assembly]::LoadWithPartialName("System.Web") | Out-Null
             $repo = [System.Web.HttpUtility]::UrlEncode($repoUrl)
             $issueTracker = [System.Web.HttpUtility]::UrlEncode(($repoUrl + "issues/"))
+            $readmeUrl = [System.Web.HttpUtility]::UrlEncode($readmeUrl)
         }
 
         'Publish to VSIX Gallery...' | Write-Host -ForegroundColor Cyan -NoNewline
@@ -75,7 +86,7 @@ function Vsix-PublishToGallery{
 
         foreach($vsixFile in $fileNames)
         {
-            [string]$url = ($vsixUploadEndpoint + "?repo=" + $repo + "&issuetracker=" + $issueTracker)
+            [string]$url = ($vsixUploadEndpoint + "?repo=" + $repo + "&issuetracker=" + $issueTracker + "&readmeUrl=" + $readmeUrl)
             [byte[]]$bytes = [System.IO.File]::ReadAllBytes($vsixFile)
              
             try {
